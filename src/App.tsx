@@ -4,6 +4,7 @@ import { AppRouter } from '@/app/router'
 import { ThemeController } from '@/features/settings/ThemeController'
 import { initializeDatabase } from '@/db'
 import { APP_NAME } from '@/brand'
+import { routerBasename } from '@/utils/appBase'
 
 export default function App() {
   const [ready, setReady] = useState(false)
@@ -32,7 +33,7 @@ export default function App() {
       <div className="text-sm text-text-muted">Preparando ficha e compêndio local…</div>
     </div>
   ) : (
-    <BrowserRouter>
+    <BrowserRouter basename={routerBasename()}>
       <AppRouter />
     </BrowserRouter>
   )

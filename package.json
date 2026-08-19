@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:web": "vite build",
     "lint": "oxlint",
     "test": "node --import ./scripts/test-alias.mjs --test \"src/**/*.test.ts\"",
     "test:watch": "node --import ./scripts/test-alias.mjs --test --watch \"src/**/*.test.ts\"",

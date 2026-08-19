@@ -7,6 +7,14 @@ Sem fins lucrativos, feito por fã. Conteúdo de regras vem do
 [Archives of Nethys](https://2e.aonprd.com/) sob a Community Use Policy da
 Paizo — veja [`AVISO-LEGAL.md`](./AVISO-LEGAL.md) para o aviso completo.
 
+## Site
+
+https://tointoinp3.github.io/pathtools-pf2e/
+
+Abre no navegador, sem instalar nada. Fichas e homebrew ficam **neste
+aparelho e neste navegador** (não na nuvem). Para levar a outro PC, use
+exportar / importar JSON.
+
 ## Estado atual
 
 **Character Builder funcional.** Combate de mesa (grid, encontros) e Mundo /

@@ -8,6 +8,7 @@ import {
 import { useAppTabs, useTabLocationSync } from '@/features/tabs/useAppTabs'
 import { useTabStore } from '@/stores/tabStore'
 import { useWorkspaceStore } from '@/stores/workspaceStore'
+import { absoluteAppUrl } from '@/utils/appBase'
 
 export function TabBar() {
   useTabLocationSync()
@@ -155,9 +156,7 @@ export function TabBar() {
           onCopy={() =>
             runMenu(() => {
               if (!menuTab) return
-              void navigator.clipboard?.writeText(
-                `${window.location.origin}${menuTab.href}`,
-              )
+              void navigator.clipboard?.writeText(absoluteAppUrl(menuTab.href))
             })
           }
         />

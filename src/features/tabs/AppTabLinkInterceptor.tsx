@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useAppTabs } from '@/features/tabs/useAppTabs'
 import { tabOpenIntent } from '@/features/tabs/tabLogic'
+import { stripAppBase } from '@/utils/appBase'
 
 function internalHref(anchor: HTMLAnchorElement): string | null {
   if (anchor.hasAttribute('download')) return null
@@ -12,7 +13,7 @@ function internalHref(anchor: HTMLAnchorElement): string | null {
   try {
     const url = new URL(anchor.href, window.location.origin)
     if (url.origin !== window.location.origin) return null
-    return `${url.pathname}${url.search}${url.hash}`
+    return `${stripAppBase(url.pathname)}${url.search}${url.hash}`
   } catch {
     return null
   }
