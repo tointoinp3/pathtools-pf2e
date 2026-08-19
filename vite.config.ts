@@ -13,6 +13,11 @@ const pagesBase =
 
 export default defineConfig({
   base: pagesBase,
+  server: {
+    watch: {
+      ignored: ['**/src-tauri/**'],
+    },
+  },
   plugins: [
     react(),
     tailwindcss(),

@@ -15,6 +15,14 @@ Abre no navegador, sem instalar nada. Fichas e homebrew ficam **neste
 aparelho e neste navegador** (não na nuvem). Para levar a outro PC, use
 exportar / importar JSON.
 
+## Windows (.exe)
+
+https://github.com/tointoinp3/pathtools-pf2e/releases/latest
+
+Instalador para usar sem o navegador. O Windows pode avisar que o app não é
+reconhecido (não há certificado pago): **Mais informações → Executar mesmo
+assim**. Fichas do site e do programa não se misturam.
+
 ## Estado atual
 
 **Character Builder funcional.** Combate de mesa (grid, encontros) e Mundo /

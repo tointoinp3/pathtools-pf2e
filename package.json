@@ -12,7 +12,8 @@
     "test:watch": "node --import ./scripts/test-alias.mjs --test --watch \"src/**/*.test.ts\"",
     "check:pt": "node scripts/check-pt-coverage.mjs",
     "check:bestiary": "node scripts/assert-family-asides.mjs && node scripts/assert-creature-lore.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "tauri": "tauri"
   },
   "dependencies": {
     "dexie": "^4.4.4",
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "@tauri-apps/cli": "^2.11.4",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { APP_NAME, WINDOWS_RELEASES_URL, isDesktopApp } from '@/brand'
 import { Field, Input } from '@/components/ui/Field'
 import { Panel, Tip } from '@/components/ui/Panel'
 import { Button } from '@/components/ui/Button'
@@ -61,6 +62,31 @@ export function SettingsPage() {
         escolhe se aparece na hora, depois de alguns segundos, ou se some. Use
         Ctrl + scroll para mudar o tamanho do texto na hora.
       </Tip>
+
+      {isDesktopApp() ? null : (
+        <Panel title="Baixar para Windows">
+          <p className="text-sm text-text-muted">
+            Instalador do {APP_NAME} para usar sem o navegador. Não precisa do
+            Node. Fichas do site e do programa não se misturam — leve-as com
+            exportar / importar JSON.
+          </p>
+          <p className="mt-2 text-xs text-text-dim">
+            Se o Windows mostrar “O Windows protegeu o seu PC”: Mais
+            informações → Executar mesmo assim. Não cobramos certificado de
+            editor (é gratuito).
+          </p>
+          <div className="mt-3">
+            <Button
+              variant="accent"
+              onClick={() => {
+                window.open(WINDOWS_RELEASES_URL, '_blank', 'noopener,noreferrer')
+              }}
+            >
+              Baixar instalador
+            </Button>
+          </div>
+        </Panel>
+      )}
 
       <Panel title="Tamanho do texto">
         <Field
