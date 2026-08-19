@@ -1,0 +1,83 @@
+import type { Spell } from '@/types/spell'
+
+/**
+ * Magias ocultas Remaster, postos 7–10, que ainda não estavam no catálogo
+ * (as que também são arcanas/divinas já entram nessas listas, com tradição oculta).
+ * Sem legado, sem foco, sem ritual. Resumos curtos em pt-BR.
+ *
+ * Gerado por scripts/generate-occult-spells-7-10.mjs. Não editar à mão.
+ */
+export const occultSpellsRank7to10: Spell[] = [
+  {
+    id: "spell-possession",
+    name: "Possessão",
+    originalName: "Possession",
+    rank: 7,
+    traditions: ["occult"],
+    traits: ["Concentrate", "Incapacitation", "Manipulate", "Mental", "Possession"],
+    rarity: "uncommon",
+    provenance: { type: 'official' },
+    actionType: "two",
+    summary: "Envia sua mente e alma para o corpo de outra criatura. (incomum) Altura 9º.",
+    description: "Você envia sua mente e alma para o corpo do alvo, tentando assumir o controle. O alvo deve tentar uma salvaguarda de Vontade. Se quiser exercer menos controle sobre o alvo, você pode optar por usar os efeitos de qualquer grau de sucesso mais favorável ao alvo.\n\n Enquanto você possui um alvo, seu próprio corpo fica inconsciente e não consegue acordar normalmente. Você pode sentir tudo o que o alvo possuído faz. Você pode dispensar esta magia. Se o corpo possuído morrer, a magia termina e você deve ter sucesso em uma salvaguarda de Fortitude contra seu CD de magia ou ficará paralisado por 1 hora, ou 24 horas em caso de falha crítica. Se a magia terminar durante um encontro, você age logo antes da iniciativa da criatura possuída.\n\n**Sucesso crítico** O alvo não é afetado.\n\n**Sucesso** Você possui o alvo, mas não pode controlá-lo. Você cavalga no corpo enquanto dura a magia.\n\n**Falha** Você possui o alvo e assume controle parcial dele. Você não tem mais um turno separado; em vez disso, você pode controlar o alvo. No início de cada turno do alvo, ele tenta outra salvaguarda de Vontade. Se falhar, é controlado por você naquele turno; se tiver sucesso, escolhe as suas próprias ações; e se tiver sucesso crítico, força você a sair e a magia termina.\n\n**Falha crítica** Você possui o alvo totalmente, e ele só pode observar enquanto você o manipula como uma marionete. O alvo é controlado por você.\n\n**Altura (9º)** A duração é de 10 minutos, e você pode entrar fisicamente no corpo da criatura, protegendo seu corpo físico enquanto durar a magia.",
+    duration: "1 minuto",
+    defense: "Vontade",
+    targets: "1 criatura viva",
+    range: "9 m",
+    aonUrl: "https://2e.aonprd.com/Spells.aspx?ID=1638",
+  },
+  {
+    id: "spell-visions-of-danger",
+    name: "Visões de Perigo",
+    originalName: "Visions of Danger",
+    rank: 7,
+    traditions: ["occult"],
+    traits: ["Auditory", "Concentrate", "Illusion", "Manipulate", "Visual"],
+    rarity: "common",
+    provenance: { type: 'official' },
+    actionType: "three",
+    summary: "Visão de um enxame causa dano mental. Altura +1.",
+    description: "Uma ilusão de criaturas horríveis preenche a área da magia. As criaturas se parecem com pequenos monstros enxameados com uma aparência específica de sua escolha, como moscas diabólicas ou lâminas de serra animadas. A explosão causa 8d8 dano mental com uma salvaguarda básica de Vontade a cada criatura que está dentro da explosão quando ela é criada, entra na explosão ou inicia seu turno dentro da explosão. Uma criatura que obtiver sucesso crítico em sua salvaguarda de Vontade pode imediatamente tentar descrer da ilusão. Uma criatura que tente interagir com os monstros ou observe um deles com uma ação de Procurar pode tentar desacreditar da ilusão. Criaturas que não acreditam na ilusão não sofrem danos da ilusão depois disso.\n\n**Altura (+1)** O dano mental aumenta em 1d8.",
+    duration: "1 minuto",
+    defense: "Vontade básico",
+    area: "explosão de 9 m",
+    range: "150 m",
+    aonUrl: "https://2e.aonprd.com/Spells.aspx?ID=2040",
+  },
+  {
+    id: "spell-unfathomable-song",
+    name: "Canção Insondável",
+    originalName: "Unfathomable Song",
+    rank: 9,
+    traditions: ["occult"],
+    traits: ["Auditory", "Concentrate", "Emotion", "Fear", "Incapacitation", "Manipulate", "Mental"],
+    rarity: "common",
+    provenance: { type: 'official' },
+    actionType: "two",
+    summary: "Canção debilita criaturas de formas estranhas e poderosas.",
+    description: "Notas fugazes de uma música estranha e antinatural preenchem o ar, dominando a mente. Cada alvo deve tentar uma salvaguarda de Vontade quando você lançar a magia e novamente na primeira vez que você sustentar a magia a cada rodada. Uma criatura precisa tentar apenas um salvamento contra a música a cada rodada, e você deve manter os mesmos alvos ao sustentar a magia.\n\n**Sucesso crítico** O alvo não é afetado, não pode ser afetado nas rodadas subsequentes e fica temporariamente imune por 1 minuto.\n\n**Sucesso** O alvo não é afetado nesta rodada, mas pode ser afetado nas rodadas subsequentes.\n\n**Falha** Role 1d4 na tabela a seguir.\n\n**Falha crítica** Role 1d4+1 na tabela a seguir.\n\n## Canção Insondável\n\n **Resultado** **Efeito** 1 O alvo fica amedrontado 2. 2 O alvo fica confuso por 1 rodada. 3 O alvo é aturdido 4 por 1 rodada. 4 O alvo fica cego por 1 rodada. 5 O alvo fica atordoado por 1 rodada e aturdido 1 por duração ilimitada.",
+    duration: "sustentada até 1 minuto",
+    defense: "Vontade",
+    targets: "up to 5 criaturas",
+    range: "36 m",
+    aonUrl: "https://2e.aonprd.com/Spells.aspx?ID=1731",
+  },
+  {
+    id: "spell-fabricated-truth",
+    name: "Verdade Fabricada",
+    originalName: "Fabricated Truth",
+    rank: 10,
+    traditions: ["occult"],
+    traits: ["Concentrate", "Incapacitation", "Manipulate", "Mental"],
+    rarity: "common",
+    provenance: { type: 'official' },
+    actionType: "three",
+    summary: "Faz criaturas acreditarem que algo é fato.",
+    description: "Escolha uma única afirmação em que você deseja que os alvos acreditem. O fato pode ser restrito, como “um dragão está circulando no alto e quer me matar”; de amplo alcance, como “todos os humanóides são abominações disfarçadas”; ou conceitual, como \"se eu não viver uma vida mais gentil, serei punido na vida após a morte\". As experiências dos alvos influenciam a forma como eles reagem a esta “verdade” e como o seu comportamento muda. Se a afirmação muda o que eles percebem, eles tratam a mudança como uma revelação repentina.\n\n O efeito da magia depende da segurança de Vontades dos alvos. Se um alvo já for afetado por _Verdade Fabricada_, sua magia tenta contrapor ele. Se o teste de contraposição falhar, o resultado das salvaguardas do alvo não pode ser pior que um sucesso.\n\n**Sucesso crítico** O alvo não acredita na afirmação e sabe que você tentou enganá-lo.\n\n**Sucesso** O alvo não acredita na afirmação nem percebe que você tentou enganá-lo.\n\n**Falha** O alvo acredita na afirmação por 1 semana.\n\n**Falha crítica** O alvo acredita na afirmação com duração ilimitada.",
+    duration: "varia",
+    defense: "Vontade",
+    targets: "up to 5 criaturas",
+    range: "30 m",
+    aonUrl: "https://2e.aonprd.com/Spells.aspx?ID=1520",
+  },
+]

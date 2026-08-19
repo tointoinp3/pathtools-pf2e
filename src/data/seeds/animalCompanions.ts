@@ -1,0 +1,2616 @@
+import type { AttributeId } from '@/types'
+import type { AnimalCompanionTypeDefinition } from '@/types/companion'
+
+function attrs(
+  strength: number,
+  dexterity: number,
+  constitution: number,
+  intelligence: number,
+  wisdom: number,
+  charisma: number,
+): Record<AttributeId, number> {
+  return { strength, dexterity, constitution, intelligence, wisdom, charisma }
+}
+
+/**
+ * Catálogo de companheiros animais.
+ * Fonte: https://2e.aonprd.com/Companions.aspx
+ * Stats = ficha jovem. PV/CA/ataques/avanço são calculados no motor:
+ * PV = PV do tipo + (6 + CON) × nível do mestre.
+ */
+export const ANIMAL_COMPANION_TYPES: AnimalCompanionTypeDefinition[] = [
+  {
+    id: 'companion-antelope',
+    name: 'Antílope',
+    originalName: 'Antelope',
+    description:
+      'Seu companheiro é um antílope ou animal similar, como dik-dik, gazela ou gnu.',
+    source: 'Howl of the Wild pg. 90',
+    size: 'medium',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 3, 2, -4, 1, 0),
+    ancestryHitPoints: 6,
+    skill: 'survival',
+    senses: ['visão na penumbra'],
+    speeds: { land: 40 },
+    isMount: true,
+    special: 'Montaria. Tamanho jovem: Médio ou Grande.',
+    attacks: [
+      {
+        id: 'antelope-horns',
+        name: 'Chifres',
+        originalName: 'horns',
+        traits: ['finesse'],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+        finesse: true,
+      },
+      {
+        id: 'antelope-hoof',
+        name: 'Casco',
+        originalName: 'hoof',
+        traits: ['ágil', 'finesse'],
+        damageDie: '1d4',
+        damageType: 'contundente',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, enquanto montado no antílope, seus Golpes que causam dano a uma criatura no alcance dele também causam 1d6 de sangramento persistente (2d6 se ágil ou feroz).',
+    advancedManeuver: {
+      name: 'Retirada Saltitante',
+      originalName: 'Bounding Retreat',
+      actionType: 'two',
+      description:
+        'O antílope Salta duas vezes. Se tiver cavaleiro, pode deixá-lo em um espaço vazio ao Saltar para fora dele.',
+    },
+  },
+  {
+    id: 'companion-ape',
+    name: 'Macaco',
+    originalName: 'Ape',
+    description: 'Seu companheiro é um macaco ou outro primata.',
+    source: 'Player Core pg. 206',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 1, 2, -4, 2, 0),
+    ancestryHitPoints: 8,
+    skill: 'intimidation',
+    senses: ['visão na penumbra'],
+    speeds: { land: 25, climb: 25 },
+    attacks: [
+      {
+        id: 'ape-fist',
+        name: 'Punho',
+        originalName: 'fist',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'contundente',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, se você acertar e causar dano a uma criatura no alcance do macaco, ela fica amedrontada 1.',
+    advancedManeuver: {
+      name: 'Exibição Aterrorizante',
+      originalName: 'Frightening Display',
+      actionType: 'one',
+      description:
+        'O macaco tenta Desmoralizar o alvo; a exibição ganha o traço visual e não exige idioma. Enquanto amedrontado por esta habilidade, o alvo fica desprevenido contra o macaco.',
+    },
+  },
+  {
+    id: 'companion-arboreal-sapling',
+    name: 'Muda Arbórea',
+    originalName: 'Arboreal Sapling',
+    description:
+      'Uma árvore andante, prima dos guardiões arbóreos. Tem o traço planta em vez de animal, mas funciona como companheiro animal. Em geral só para druidas da ordem animal que também sejam da ordem da folha.',
+    source: 'Player Core pg. 206',
+    size: 'small',
+    traits: ['planta', 'minion'],
+    attributes: attrs(3, 1, 2, -4, 2, 0),
+    ancestryHitPoints: 8,
+    skill: 'stealth',
+    senses: ['visão na penumbra'],
+    speeds: { land: 25 },
+    special: 'Incomum. Acesso: membro da ordem da folha.',
+    attacks: [
+      {
+        id: 'arboreal-branch',
+        name: 'Galho',
+        originalName: 'branch',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'contundente',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, se você acertar e causar dano a uma criatura no alcance da muda, o primeiro quadrado para o qual ela se mover após o dano é terreno difícil.',
+    advancedManeuver: {
+      name: 'Arremessar Rocha',
+      originalName: 'Throw Rock',
+      actionType: 'one',
+      description:
+        'A muda Interage para pegar uma rocha ao alcance ou sacar uma guardada, então faz um Golpe à distância de rocha: 2d6 contundente (3d6 se especializado), incremento de alcance 9 m.',
+    },
+  },
+  {
+    id: 'companion-badger',
+    name: 'Texugo',
+    originalName: 'Badger',
+    description:
+      'Seu companheiro é um texugo, glutão ou outro mustelídeo grande.',
+    source: 'Player Core pg. 207',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 2, 2, -4, 2, 0),
+    ancestryHitPoints: 8,
+    skill: 'survival',
+    senses: ['visão na penumbra', 'faro (impreciso, 9 m)'],
+    speeds: { land: 25, burrow: 10, climb: 10 },
+    attacks: [
+      {
+        id: 'badger-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+      },
+      {
+        id: 'badger-claw',
+        name: 'Garra',
+        originalName: 'claw',
+        traits: ['ágil'],
+        damageDie: '1d6',
+        damageType: 'cortante',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, se você acertar e causar dano a uma criatura ameaçada pelo texugo, o alvo não pode usar Passo (salvo se puder Passar por terreno difícil) até sair da posição atual.',
+    advancedManeuver: {
+      name: 'Fúria do Texugo',
+      originalName: 'Badger Rage',
+      actionType: 'one',
+      description:
+        'Entra em fúria por 1 minuto, até não perceber inimigos ou ficar inconsciente. Não pode parar voluntariamente. +4 de dano nas mandíbulas, +2 nas garras, −1 na CA, não usa ações de concentração (pode Procurar). Depois, 1 minuto de espera.',
+    },
+  },
+  {
+    id: 'companion-bat',
+    name: 'Morcego',
+    originalName: 'Bat',
+    description:
+      'Seu companheiro é um morcego particularmente grande, como um morcego gigante.',
+    source: 'Player Core pg. 207',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 3, 2, -4, 1, 0),
+    ancestryHitPoints: 6,
+    skill: 'stealth',
+    senses: [
+      'ecolocalização 6 m (audição precisa neste alcance)',
+      'visão na penumbra',
+    ],
+    speeds: { land: 15, fly: 30 },
+    attacks: [
+      {
+        id: 'bat-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: ['finesse'],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+        finesse: true,
+      },
+      {
+        id: 'bat-wing',
+        name: 'Asa',
+        originalName: 'wing',
+        traits: ['ágil', 'finesse'],
+        damageDie: '1d4',
+        damageType: 'cortante',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, criaturas no alcance do morcego que você danificar com Golpes sofrem −1 de circunstância nos testes de ataque.',
+    advancedManeuver: {
+      name: 'Açoite de Asas',
+      originalName: 'Wing Thrash',
+      actionType: 'two',
+      description:
+        'O morcego faz Golpes de asa contra até três inimigos adjacentes. Cada ataque conta para o MAP, mas a penalidade só aumenta depois de todos.',
+    },
+  },
+  {
+    id: 'companion-bear',
+    name: 'Urso',
+    originalName: 'Bear',
+    description:
+      'Seu companheiro é um urso-negro, grizzly, polar ou outro tipo de urso.',
+    source: 'Player Core pg. 207',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 2, 2, -4, 1, 0),
+    ancestryHitPoints: 8,
+    skill: 'intimidation',
+    senses: ['visão na penumbra', 'faro (impreciso, 9 m)'],
+    speeds: { land: 35 },
+    attacks: [
+      {
+        id: 'bear-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+      },
+      {
+        id: 'bear-claw',
+        name: 'Garra',
+        originalName: 'claw',
+        traits: ['ágil'],
+        damageDie: '1d6',
+        damageType: 'cortante',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, cada vez que você acertar uma criatura no alcance do urso com um Golpe, ela sofre 1d8 de dano cortante do urso (2d8 se o urso for ágil ou feroz).',
+    advancedManeuver: {
+      name: 'Abraço do Urso',
+      originalName: 'Bear Hug',
+      actionType: 'one',
+      requirements: 'A última ação do urso foi um Golpe de garra bem-sucedido.',
+      description:
+        'O urso faz outro Golpe de garra contra o mesmo alvo. Se acertar, o alvo também fica agarrado (como se o urso tivesse obtido sucesso em Agarrar).',
+    },
+  },
+  {
+    id: 'companion-bird',
+    name: 'Ave',
+    originalName: 'Bird',
+    description:
+      'Seu companheiro é uma ave de rapina, como águia, falcão ou coruja.',
+    source: 'Player Core pg. 208',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 3, 1, -4, 2, 0),
+    ancestryHitPoints: 4,
+    skill: 'stealth',
+    senses: ['visão na penumbra'],
+    speeds: { land: 10, fly: 60 },
+    attacks: [
+      {
+        id: 'bird-jaws',
+        name: 'Bico',
+        originalName: 'jaws',
+        traits: ['finesse'],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+        finesse: true,
+      },
+      {
+        id: 'bird-talon',
+        name: 'Garras',
+        originalName: 'talon',
+        traits: ['ágil', 'finesse'],
+        damageDie: '1d4',
+        damageType: 'cortante',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, seus Golpes que causam dano a uma criatura ameaçada pela ave também causam 1d4 de sangramento persistente e o alvo fica ofuscado até remover o sangramento (2d4 se a ave for ágil ou feroz).',
+    advancedManeuver: {
+      name: 'Ataque em Voo',
+      originalName: 'Flyby Attack',
+      actionType: 'two',
+      description:
+        'A ave Voa e faz um Golpe de garras em qualquer ponto do percurso.',
+    },
+  },
+  {
+    id: 'companion-boar',
+    name: 'Javali',
+    originalName: 'Boar',
+    description: 'Seu companheiro é um javali ou porco.',
+    source: 'Player Core pg. 208',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 1, 2, -4, 2, 0),
+    ancestryHitPoints: 8,
+    skill: 'survival',
+    senses: ['visão na penumbra', 'faro (impreciso, 9 m)'],
+    speeds: { land: 35 },
+    attacks: [
+      {
+        id: 'boar-tusk',
+        name: 'Presa',
+        originalName: 'tusk',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, seus Golpes que causam dano a uma criatura no alcance do javali também causam 1d6 de sangramento persistente (2d6 se ágil ou feroz).',
+    advancedManeuver: {
+      name: 'Investida do Javali',
+      originalName: 'Boar Charge',
+      actionType: 'two',
+      description:
+        'O javali Avança duas vezes em linha reta e então faz um Golpe de presa. Se moveu pelo menos 6 m, ganha +2 de circunstância no ataque.',
+    },
+  },
+  {
+    id: 'companion-cat',
+    name: 'Felino',
+    originalName: 'Cat',
+    description:
+      'Seu companheiro é um grande felino, como leopardo ou tigre.',
+    source: 'Player Core pg. 208',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 3, 1, -4, 2, 0),
+    ancestryHitPoints: 4,
+    skill: 'stealth',
+    senses: ['visão na penumbra', 'faro (impreciso, 9 m)'],
+    speeds: { land: 35 },
+    special:
+      'O felino causa +1d4 de dano de precisão contra alvos desprevenidos.',
+    attacks: [
+      {
+        id: 'cat-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: ['finesse'],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+        finesse: true,
+      },
+      {
+        id: 'cat-claw',
+        name: 'Garra',
+        originalName: 'claw',
+        traits: ['ágil', 'finesse'],
+        damageDie: '1d4',
+        damageType: 'cortante',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, seus Golpes que causam dano a uma criatura no alcance do felino deixam o alvo desprevenido até o fim do seu próximo turno.',
+    advancedManeuver: {
+      name: 'Salto do Felino',
+      originalName: 'Cat Pounce',
+      actionType: 'one',
+      description:
+        'O felino Avança e então Golpeia. Se estava indetectado no início, permanece indetectado até depois do ataque. (Traço floreio.)',
+    },
+  },
+  {
+    id: 'companion-crocodile',
+    name: 'Crocodilo',
+    originalName: 'Crocodile',
+    description:
+      'Seu companheiro é um crocodilo ou réptil similar, como jacaré ou caimão.',
+    source: 'Player Core pg. 208',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 2, 2, -4, 1, 0),
+    ancestryHitPoints: 6,
+    skill: 'stealth',
+    senses: ['visão na penumbra'],
+    speeds: { land: 20, swim: 25 },
+    special: 'Pode prender a respiração por cerca de 2 horas.',
+    attacks: [
+      {
+        id: 'crocodile-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+      },
+      {
+        id: 'crocodile-tail',
+        name: 'Cauda',
+        originalName: 'tail',
+        traits: ['finesse'],
+        damageDie: '1d6',
+        damageType: 'contundente',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, se seu Golpe danificar uma criatura no alcance do crocodilo, ele pode cravar as mandíbulas nela e se mover junto até o fim do seu próximo turno. Só uma criatura por vez; precisa soltar para Golpear com mandíbulas. Se o alvo for menor, −3 m de circunstância nas Velocidades e não pode Voar enquanto estiver cravado.',
+    advancedManeuver: {
+      name: 'Rolamento da Morte',
+      originalName: 'Death Roll',
+      actionType: 'one',
+      requirements: 'O crocodilo tem uma criatura agarrada.',
+      description:
+        'Faz um Golpe de mandíbulas com +2 de circunstância contra a criatura agarrada. Se acertar, também a derruba. Se errar, solta a criatura.',
+    },
+  },
+  {
+    id: 'companion-dromaeosaur',
+    name: 'Dromeossauro',
+    originalName: 'Dromaeosaur',
+    description:
+      'Seu companheiro é um dromeossauro (raptor), como velociraptor ou deinonico.',
+    source: 'Player Core pg. 209',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 3, 2, -4, 1, 0),
+    ancestryHitPoints: 6,
+    skill: 'stealth',
+    senses: ['visão na penumbra', 'faro (impreciso, 9 m)'],
+    speeds: { land: 50 },
+    attacks: [
+      {
+        id: 'raptor-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: ['finesse'],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+        finesse: true,
+      },
+      {
+        id: 'raptor-talon',
+        name: 'Garras',
+        originalName: 'talon',
+        traits: ['ágil', 'finesse'],
+        damageDie: '1d6',
+        damageType: 'cortante',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, conta como estando no próprio espaço ou em um espaço vazio à sua escolha em até 3 m para flanquear; você pode escolher um espaço diferente para cada ataque.',
+    advancedManeuver: {
+      name: 'Ataque Furtivo',
+      originalName: 'Darting Attack',
+      actionType: 'one',
+      description:
+        'O raptor dá um Passo de até 3 m e então Golpeia, ou Golpeia e então dá um Passo de até 3 m. (Traço floreio.)',
+    },
+  },
+  {
+    id: 'companion-elk',
+    name: 'Alce',
+    originalName: 'Elk',
+    description:
+      'Seu companheiro é um alce ou cervídeo similar, como caribu, veado grande ou alce-americano.',
+    source: 'Howl of the Wild pg. 90',
+    size: 'medium',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 2, 2, -4, 1, 0),
+    ancestryHitPoints: 8,
+    skill: 'intimidation',
+    senses: ['visão na penumbra'],
+    speeds: { land: 30 },
+    isMount: true,
+    special: 'Montaria. Tamanho jovem: Médio ou Grande.',
+    attacks: [
+      {
+        id: 'elk-antlers',
+        name: 'Galhadas',
+        originalName: 'antlers',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+      },
+      {
+        id: 'elk-hoof',
+        name: 'Casco',
+        originalName: 'hoof',
+        traits: ['ágil'],
+        damageDie: '1d6',
+        damageType: 'contundente',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, se você acertar e causar dano a uma criatura no alcance do alce, ela fica amedrontada 1.',
+    advancedManeuver: {
+      name: 'Catapulta de Galhadas',
+      originalName: 'Antler Catapult',
+      actionType: 'two',
+      description:
+        'O alce dá um Passo e então faz um Golpe de galhadas. Se se moveu e acertou, pode arremessar o alvo para o espaço que acabou de deixar (movimento forçado).',
+    },
+  },
+  {
+    id: 'companion-horse',
+    name: 'Cavalo',
+    originalName: 'Horse',
+    description:
+      'Seu companheiro é um cavalo, pônei ou equino similar.',
+    source: 'Player Core pg. 209',
+    size: 'medium',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 2, 2, -4, 1, 0),
+    ancestryHitPoints: 8,
+    skill: 'survival',
+    senses: ['visão na penumbra', 'faro (impreciso, 9 m)'],
+    speeds: { land: 40 },
+    isMount: true,
+    special: 'Montaria. Tamanho jovem: Médio ou Grande.',
+    attacks: [
+      {
+        id: 'horse-hoof',
+        name: 'Casco',
+        originalName: 'hoof',
+        traits: ['ágil'],
+        damageDie: '1d6',
+        damageType: 'contundente',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, se você estiver montado e se moveu 3 m ou mais na ação antes de um Golpe corpo a corpo, some bônus de circunstância ao dano igual a duas vezes o número de dados de dano da arma. Se a arma já tiver o traço justar, aumente esse bônus em +2 por dado.',
+    advancedManeuver: {
+      name: 'Galope',
+      originalName: 'Gallop',
+      actionType: 'two',
+      description:
+        'O cavalo Avança duas vezes com +3 m de circunstância à Velocidade.',
+    },
+  },
+  {
+    id: 'companion-riding-drake',
+    name: 'Drake de Montaria',
+    originalName: 'Riding Drake',
+    description:
+      'Um drake rápido e sem voo, menos violento que a maioria, mas ferozmente leal. Tem o traço dragão em vez de animal, mas funciona como companheiro animal.',
+    source: 'Player Core pg. 209',
+    size: 'large',
+    traits: ['dragão', 'minion'],
+    attributes: attrs(2, 1, 2, -4, 1, 2),
+    ancestryHitPoints: 8,
+    skill: 'intimidation',
+    senses: ['visão no escuro'],
+    speeds: { land: 45 },
+    isMount: true,
+    special: 'Incomum. Montaria.',
+    attacks: [
+      {
+        id: 'drake-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+      },
+      {
+        id: 'drake-tail',
+        name: 'Cauda',
+        originalName: 'tail',
+        traits: [],
+        damageDie: '1d6',
+        damageType: 'contundente',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, cada vez que você Golpear montado no drake e acertar uma criatura no alcance dele, ela sofre 1d4 de dano de fogo (2d4 se ágil ou feroz).',
+    advancedManeuver: {
+      name: 'Sopro de Fogo',
+      originalName: 'Fire Breath',
+      actionType: 'two',
+      description:
+        '1× por hora: cone de 9 m de fogo, 1d6 de fogo a cada 2 níveis do drake (salvaguarda básica de Reflexos). CD treinada com CON do drake, ou especialista se especializado.',
+    },
+  },
+  {
+    id: 'companion-scorpion',
+    name: 'Escorpião',
+    originalName: 'Scorpion',
+    description: 'Seu companheiro é uma das várias espécies de escorpião gigante.',
+    source: 'Player Core pg. 210',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 3, 1, -4, 1, 0),
+    ancestryHitPoints: 6,
+    skill: 'stealth',
+    senses: ['visão no escuro'],
+    speeds: { land: 30 },
+    special:
+      'O ferrão causa +1d4 de dano de veneno (+2d4 se especializado).',
+    attacks: [
+      {
+        id: 'scorpion-stinger',
+        name: 'Ferrão',
+        originalName: 'stinger',
+        traits: [],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+      },
+      {
+        id: 'scorpion-pincer',
+        name: 'Pinça',
+        originalName: 'pincer',
+        traits: ['ágil'],
+        damageDie: '1d6',
+        damageType: 'cortante',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, seus Golpes que causam dano a uma criatura no alcance do escorpião também causam 1d6 de veneno persistente (2d6 se ágil ou feroz).',
+    advancedManeuver: {
+      name: 'Agarrar e Ferrar',
+      originalName: 'Grab and Sting',
+      actionType: 'two',
+      description:
+        'Faz um Golpe de pinça. Se acertar, o alvo fica automaticamente agarrado e o escorpião faz um Golpe de ferrão contra ele. Agarrado dura até o fim do seu próximo turno.',
+    },
+  },
+  {
+    id: 'companion-shark',
+    name: 'Tubarão',
+    originalName: 'Shark',
+    description:
+      'Seu companheiro é um tubarão de qualquer tipo, como martelo, branco ou serra.',
+    source: 'Player Core pg. 210',
+    size: 'small',
+    traits: ['animal', 'aquático', 'minion'],
+    attributes: attrs(3, 2, 2, -4, 1, 0),
+    ancestryHitPoints: 6,
+    skill: 'stealth',
+    senses: ['faro de sangue', 'faro (impreciso, 18 m)'],
+    speeds: { swim: 40 },
+    special:
+      'Traço aquático. Faro de sangue: sente sangue na água a até 1 milha.',
+    attacks: [
+      {
+        id: 'shark-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, cada vez que você acertar uma criatura no alcance do tubarão com um Golpe e causar dano cortante ou perfurante, ela sofre 1d8 cortante do tubarão (2d8 se ágil ou feroz).',
+    advancedManeuver: {
+      name: 'Dilacerar',
+      originalName: 'Shred',
+      actionType: 'one',
+      requirements:
+        'O tubarão acertou um Golpe de mandíbulas na ação mais recente deste turno.',
+      description:
+        'O alvo do Golpe sofre 2d8 de dano cortante (3d8 se especializado).',
+    },
+  },
+  {
+    id: 'companion-snake',
+    name: 'Serpente',
+    originalName: 'Snake',
+    description:
+      'Seu companheiro é uma cobra constritora, como jiboia ou píton.',
+    source: 'Player Core pg. 210',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 3, 1, -4, 1, 0),
+    ancestryHitPoints: 6,
+    skill: 'stealth',
+    senses: ['visão na penumbra', 'faro (impreciso, 9 m)'],
+    speeds: { land: 20, climb: 20, swim: 20 },
+    attacks: [
+      {
+        id: 'snake-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: ['finesse'],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, qualquer criatura ameaçada pela serpente não pode usar reações disparadas pelas suas ações, salvo se o nível dela for maior que o seu.',
+    advancedManeuver: {
+      name: 'Constrição',
+      originalName: 'Constrict',
+      actionType: 'one',
+      requirements: 'A serpente tem uma criatura menor agarrada.',
+      description:
+        'Causa 12 de dano contundente à criatura agarrada; salvaguarda básica de Fortitude contra sua CD de classe. Se especializada, o dano sobe para 20.',
+    },
+  },
+  {
+    id: 'companion-wolf',
+    name: 'Lobo',
+    originalName: 'Wolf',
+    description: 'Seu companheiro é um lobo, cão ou outro canídeo.',
+    source: 'Player Core pg. 210',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 3, 2, -4, 1, 0),
+    ancestryHitPoints: 6,
+    skill: 'survival',
+    senses: ['visão na penumbra', 'faro (impreciso, 9 m)'],
+    speeds: { land: 40 },
+    attacks: [
+      {
+        id: 'wolf-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: ['finesse'],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, seus Golpes que causam dano a criaturas ameaçadas pelo lobo impõem −1,5 m de penalidade de status às Velocidades do alvo por 1 minuto (−3 m em sucesso crítico).',
+    advancedManeuver: {
+      name: 'Derrubar',
+      originalName: 'Takedown',
+      actionType: 'one',
+      requirements:
+        'A última ação do companheiro foi um Golpe de mandíbulas bem-sucedido.',
+      description:
+        'O lobo derruba automaticamente o alvo do Golpe de mandíbulas (fica de bruços).',
+    },
+  },
+  {
+    id: 'companion-flying-squirrel',
+    name: 'Esquilo-voador',
+    originalName: 'Flying Squirrel',
+    description:
+      'Seu companheiro é um esquilo-voador gigante ou petauro-do-açúcar.',
+    source: 'Howl of the Wild pg. 91',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 3, 1, -4, 2, 0),
+    ancestryHitPoints: 6,
+    skill: 'stealth',
+    senses: ['visão na penumbra', 'faro (impreciso, 9 m)'],
+    speeds: { land: 25, climb: 25 },
+    special:
+      'Ao cair, pode planar: cai só 1,5 m no início do seu turno e move até 7,5 m na horizontal. Não plana se não puder agir.',
+    attacks: [
+      {
+        id: 'squirrel-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: ['finesse'],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+        finesse: true,
+      },
+      {
+        id: 'squirrel-claw',
+        name: 'Garra',
+        originalName: 'claw',
+        traits: ['ágil', 'finesse'],
+        damageDie: '1d4',
+        damageType: 'cortante',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o fim do seu próximo turno, se seu Golpe danificar uma criatura no alcance do esquilo, ela sofre −3 m de circunstância nas Velocidades por 1 rodada.',
+    advancedManeuver: {
+      name: 'Morte do Alto',
+      originalName: 'Death From Above',
+      actionType: 'one',
+      requirements: 'O esquilo-voador está acima do alvo.',
+      description:
+        'Cai em um espaço vazio adjacente ao alvo (sem dano de queda) e faz dois Golpes de garra. Ambos contam para o MAP, mas a penalidade só aumenta depois dos dois. (Traço floreio.)',
+    },
+  },
+  {
+    id: 'companion-giant-eel',
+    name: 'Enguia Gigante',
+    originalName: 'Giant Eel',
+    description:
+      'Peixe longo em forma de fita, com dentes serrilhados. Companheiro avançado.',
+    source: 'Howl of the Wild pg. 93',
+    size: 'large',
+    traits: ['animal', 'aquático', 'minion'],
+    attributes: attrs(3, 1, 2, -4, 2, 0),
+    ancestryHitPoints: 4,
+    skill: 'stealth',
+    senses: ['visão na penumbra', 'faro (impreciso, 9 m)'],
+    speeds: { land: 10, swim: 40 },
+    isMount: true,
+    minLevel: 4,
+    special: 'Incomum. Montaria. Avançado: nível 4+.',
+    attacks: [
+      {
+        id: 'eel-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, conta como no próprio espaço ou em um espaço vazio à sua escolha em até 3 m para flanquear; um espaço diferente por ataque.',
+    advancedManeuver: {
+      name: 'Estalo Nadando',
+      originalName: 'Swimming Snap',
+      actionType: 'two',
+      description:
+        'A enguia Nada e faz um Golpe de mandíbulas em qualquer ponto do percurso.',
+    },
+  },
+  {
+    id: 'companion-giant-frog',
+    name: 'Sapo Gigante',
+    originalName: 'Giant Frog',
+    description: 'Um sapo ou rã enorme. Companheiro avançado.',
+    source: 'Howl of the Wild pg. 93',
+    size: 'large',
+    traits: ['animal', 'anfíbio', 'minion'],
+    attributes: attrs(2, 2, 3, -4, 1, 0),
+    ancestryHitPoints: 6,
+    skill: 'survival',
+    senses: ['visão na penumbra'],
+    speeds: { land: 20, climb: 20, swim: 25 },
+    isMount: true,
+    minLevel: 6,
+    special: 'Montaria. Avançado: nível 6+.',
+    attacks: [
+      {
+        id: 'frog-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+      },
+      {
+        id: 'frog-tongue',
+        name: 'Língua',
+        originalName: 'tongue',
+        traits: ['alcance 4,5 m'],
+        damageDie: '1d4',
+        damageType: 'contundente',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, quando você acertar um Golpe em uma criatura ameaçada pelo sapo, ela não pode usar reações disparadas pelas suas ações, salvo se o nível dela for maior que o seu.',
+    advancedManeuver: {
+      name: 'Língua Agarradora',
+      originalName: 'Tongue Grab',
+      actionType: 'two',
+      description:
+        'Faz um Golpe de língua. Se acertar, o alvo fica automaticamente agarrado e é puxado para um quadrado adjacente. Agarrado dura até o fim do seu próximo turno.',
+    },
+  },
+  {
+    id: 'companion-giant-wasp',
+    name: 'Vespa Gigante',
+    originalName: 'Giant Wasp',
+    description:
+      'Vespa, marimbondo ou outro himenóptero ferrão grande. Companheiro avançado.',
+    source: 'Howl of the Wild pg. 93',
+    size: 'large',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 3, 2, -4, 1, 0),
+    ancestryHitPoints: 4,
+    skill: 'survival',
+    senses: ['visão no escuro'],
+    speeds: { land: 20, fly: 40 },
+    isMount: true,
+    minLevel: 14,
+    special: 'Incomum. Montaria. Avançado: nível 14+. Ferrão causa veneno extra.',
+    attacks: [
+      {
+        id: 'wasp-stinger',
+        name: 'Ferrão',
+        originalName: 'stinger',
+        traits: ['finesse'],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, se você acertar e causar dano a uma criatura no alcance da vespa, ela fica amedrontada 1.',
+    advancedManeuver: {
+      name: 'Picada Furtiva',
+      originalName: 'Darting Stab',
+      actionType: 'two',
+      description:
+        'A vespa Voa até 4,5 m e então Golpeia, ou Golpeia e então Voa até 4,5 m. (Traço floreio.)',
+    },
+  },
+  {
+    id: 'companion-giraffe',
+    name: 'Girafa',
+    originalName: 'Giraffe',
+    description: 'Seu companheiro é uma girafa.',
+    source: 'Howl of the Wild pg. 91',
+    size: 'large',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 2, 2, -4, 1, 0),
+    ancestryHitPoints: 8,
+    skill: 'intimidation',
+    senses: ['visão na penumbra', 'faro (impreciso, 9 m)'],
+    speeds: { land: 35 },
+    isMount: true,
+    special: 'Montaria.',
+    attacks: [
+      {
+        id: 'giraffe-hoof',
+        name: 'Casco',
+        originalName: 'hoof',
+        traits: ['ágil'],
+        damageDie: '1d6',
+        damageType: 'contundente',
+      },
+      {
+        id: 'giraffe-neck',
+        name: 'Pescoço',
+        originalName: 'neck',
+        traits: ['não letal', 'alcance 3 m'],
+        damageDie: '1d4',
+        damageType: 'contundente',
+      },
+    ],
+    supportBenefit:
+      'Neste turno, montado na girafa, você não precisa de mão livre para Empurrar, e qualquer alvo Empurrado com sucesso move 3 m (4,5 m em sucesso crítico).',
+    advancedManeuver: {
+      name: 'Pisoteio Longo',
+      originalName: 'Long Stomp',
+      actionType: 'two',
+      description:
+        'A girafa Avança duas vezes e então faz um Golpe de casco. Se moveu pelo menos 6 m, +1d6 contundente (+2d6 se especializada).',
+    },
+  },
+  {
+    id: 'companion-griffon',
+    name: 'Grifo',
+    originalName: 'Griffon',
+    description:
+      'Besta majestosa que combina rapina e leão. Companheiro avançado.',
+    source: 'Howl of the Wild pg. 93',
+    size: 'large',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 2, 2, -4, 1, 0),
+    ancestryHitPoints: 8,
+    skill: 'survival',
+    senses: ['visão no escuro', 'faro (impreciso, 9 m)'],
+    speeds: { land: 25, fly: 60 },
+    isMount: true,
+    minLevel: 14,
+    special: 'Montaria. Avançado: nível 14+.',
+    attacks: [
+      {
+        id: 'griffon-beak',
+        name: 'Bico',
+        originalName: 'beak',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+      },
+      {
+        id: 'griffon-talon',
+        name: 'Garras',
+        originalName: 'talon',
+        traits: ['ágil'],
+        damageDie: '1d6',
+        damageType: 'cortante',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, você e o grifo ganham +2 de circunstância em salvaguardas contra efeitos de emoção.',
+    advancedManeuver: {
+      name: 'Rajada Aérea',
+      originalName: 'Flying Strafe',
+      actionType: 'two',
+      description:
+        'O grifo Voa até sua Velocidade de voo e faz dois Golpes de garras em qualquer ponto, cada um contra uma criatura diferente.',
+    },
+  },
+  {
+    id: 'companion-hippocampus',
+    name: 'Hipocampo',
+    originalName: 'Hippocampus',
+    description:
+      'Besta que mistura cavalo e peixe. Companheiro avançado.',
+    source: 'Howl of the Wild pg. 94',
+    size: 'large',
+    traits: ['animal', 'aquático', 'minion'],
+    attributes: attrs(3, 1, 3, -4, 1, 0),
+    ancestryHitPoints: 6,
+    skill: 'survival',
+    senses: ['visão no escuro', 'faro (impreciso, 9 m)'],
+    speeds: { land: 5, swim: 40 },
+    isMount: true,
+    minLevel: 4,
+    special: 'Montaria. Avançado: nível 4+.',
+    attacks: [
+      {
+        id: 'hippocampus-tail',
+        name: 'Cauda',
+        originalName: 'tail',
+        traits: [],
+        damageDie: '1d6',
+        damageType: 'contundente',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, se estiver montado e se moveu 3 m ou mais na ação antes de um Golpe corpo a corpo, some bônus de circunstância ao dano igual a duas vezes o número de dados da arma (justar: +2 por dado extra).',
+    advancedManeuver: {
+      name: 'Retirada Súbita',
+      originalName: 'Sudden Retreat',
+      actionType: 'two',
+      description:
+        'Faz um Golpe de cauda e então Nada com +3 m de circunstância à Velocidade de natação. Hipocampo e cavaleiro ganham +2 de circunstância à CA contra reações disparadas por este movimento.',
+    },
+  },
+  {
+    id: 'companion-hippogriff',
+    name: 'Hipogrifo',
+    originalName: 'Hippogriff',
+    description:
+      'Combina traços de falcão e cavalo. Companheiro avançado.',
+    source: 'Howl of the Wild pg. 94',
+    size: 'large',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 2, 2, -4, 2, 0),
+    ancestryHitPoints: 8,
+    skill: 'survival',
+    senses: ['visão no escuro', 'faro (impreciso, 9 m)'],
+    speeds: { land: 30, fly: 60 },
+    isMount: true,
+    minLevel: 14,
+    special: 'Montaria. Avançado: nível 14+.',
+    attacks: [
+      {
+        id: 'hippogriff-beak',
+        name: 'Bico',
+        originalName: 'beak',
+        traits: [],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+      },
+      {
+        id: 'hippogriff-talon',
+        name: 'Garras',
+        originalName: 'talon',
+        traits: ['ágil'],
+        damageDie: '1d4',
+        damageType: 'cortante',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, se estiver montado e se moveu 3 m ou mais na ação antes de um Golpe corpo a corpo, some bônus de circunstância ao dano igual a duas vezes o número de dados da arma (justar: +2 por dado extra).',
+    advancedManeuver: {
+      name: 'Retirada Aérea',
+      originalName: 'Aerial Retreat',
+      actionType: 'two',
+      description:
+        'Faz um Golpe de garras e então Voa com +3 m de circunstância à Velocidade de voo. Hipogrifo e cavaleiro ganham +2 de circunstância à CA contra reações disparadas por este movimento.',
+    },
+  },
+  {
+    id: 'companion-kangaroo',
+    name: 'Canguru',
+    originalName: 'Kangaroo',
+    description: 'Seu companheiro é um canguru ou wallaby.',
+    source: 'Howl of the Wild pg. 91',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 2, 2, -4, 1, 0),
+    ancestryHitPoints: 6,
+    skill: 'survival',
+    senses: ['visão na penumbra'],
+    speeds: { land: 30 },
+    special: 'Ao Saltar na horizontal, percorre até 7,5 m.',
+    attacks: [
+      {
+        id: 'kangaroo-foot',
+        name: 'Pé',
+        originalName: 'foot',
+        traits: ['ágil'],
+        damageDie: '1d6',
+        damageType: 'contundente',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, conta como no próprio espaço ou em um espaço vazio à sua escolha em até 1,5 m para flanquear; um espaço diferente por ataque.',
+    advancedManeuver: {
+      name: 'Chute Elástico',
+      originalName: 'Spring Kick',
+      actionType: 'two',
+      description:
+        'Equilibra-se na cauda e chuta com as duas pernas. Golpe de pé: se acertar, empurra o alvo 3 m; em crítico, também derruba.',
+    },
+  },
+  {
+    id: 'companion-mole',
+    name: 'Toupeira',
+    originalName: 'Mole',
+    description:
+      'Seu companheiro é uma toupeira gigante, geômis ou cão-da-pradaria.',
+    source: 'Howl of the Wild pg. 91',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 2, 2, -4, 1, 0),
+    ancestryHitPoints: 8,
+    skill: 'stealth',
+    senses: ['visão na penumbra', 'faro (impreciso, 9 m)'],
+    speeds: { land: 25, burrow: 20 },
+    attacks: [
+      {
+        id: 'mole-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+      },
+      {
+        id: 'mole-claw',
+        name: 'Garra',
+        originalName: 'claw',
+        traits: ['ágil'],
+        damageDie: '1d6',
+        damageType: 'cortante',
+      },
+    ],
+    supportBenefit:
+      'Até o fim do seu próximo turno, se você acertar e danificar uma criatura adjacente à toupeira, ela fica desajeitada 1 até sair da posição atual.',
+    advancedManeuver: {
+      name: 'Emboscada Escavando',
+      originalName: 'Burrowing Ambush',
+      actionType: 'two',
+      description:
+        'A toupeira Escava e faz um Golpe. Se começou o movimento sob a terra, o alvo fica desprevenido neste ataque.',
+    },
+  },
+  {
+    id: 'companion-mongoose',
+    name: 'Mangusto',
+    originalName: 'Mongoose',
+    description: 'Seu companheiro é um mangusto ou suricata.',
+    source: 'Howl of the Wild pg. 92',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 3, 1, -4, 1, 1),
+    ancestryHitPoints: 4,
+    skill: 'survival',
+    senses: ['visão na penumbra', 'faro (impreciso, 9 m)'],
+    speeds: { land: 25, burrow: 10 },
+    attacks: [
+      {
+        id: 'mongoose-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: ['finesse'],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+        finesse: true,
+      },
+      {
+        id: 'mongoose-claw',
+        name: 'Garra',
+        originalName: 'claw',
+        traits: ['ágil', 'finesse'],
+        damageDie: '1d4',
+        damageType: 'cortante',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o fim do seu próximo turno, criaturas adjacentes ao mangusto não podem flanqueá-lo.',
+    advancedManeuver: {
+      name: 'Mordida Libertadora',
+      originalName: 'Liberating Bite',
+      actionType: 'one',
+      description:
+        'Golpe de mandíbulas. Se acertar, cada criatura agarrada ou restringida pelo alvo pode Escapar como ação livre. (Traço floreio.)',
+    },
+  },
+  {
+    id: 'companion-orca',
+    name: 'Orca',
+    originalName: 'Orca',
+    description: 'Seu companheiro é uma orca. Companheiro avançado.',
+    source: 'Howl of the Wild pg. 94',
+    size: 'large',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 2, 3, -4, 0, 0),
+    ancestryHitPoints: 8,
+    skill: 'survival',
+    senses: [
+      'ecolocalização 9 m (audição precisa neste alcance, debaixo d’água)',
+    ],
+    speeds: { land: 5, swim: 40 },
+    isMount: true,
+    minLevel: 6,
+    special: 'Montaria. Avançado: nível 6+. Prende a respiração por 20 minutos.',
+    attacks: [
+      {
+        id: 'orca-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, cada vez que você acertar uma criatura nadando no alcance da orca, o alvo é puxado 1,5 m para baixo na água (movimento forçado).',
+    advancedManeuver: {
+      name: 'Salto Fora d’Água',
+      originalName: 'Breach',
+      actionType: 'two',
+      description:
+        'Nada até sua Velocidade de natação, então Salta verticalmente até 7,5 m e faz um Golpe em qualquer ponto (pode atacar criatura a até 9 m da superfície). Depois cai de volta na água.',
+    },
+  },
+  {
+    id: 'companion-riding-tarantula',
+    name: 'Tarântula de Montaria',
+    originalName: 'Riding Tarantula',
+    description: 'Uma aranha peluda enorme. Companheiro avançado.',
+    source: 'Howl of the Wild pg. 95',
+    size: 'large',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 3, 1, -4, 2, 0),
+    ancestryHitPoints: 4,
+    skill: 'stealth',
+    senses: ['visão no escuro'],
+    speeds: { land: 30, climb: 30 },
+    minLevel: 6,
+    special:
+      'Avançado: nível 6+. Montaria a partir do 8º nível. Presas: +1d4 veneno (+2d4 se especializada).',
+    attacks: [
+      {
+        id: 'tarantula-fangs',
+        name: 'Presas',
+        originalName: 'fangs',
+        traits: ['finesse'],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+        finesse: true,
+      },
+      {
+        id: 'tarantula-leg',
+        name: 'Perna',
+        originalName: 'leg',
+        traits: ['ágil', 'finesse'],
+        damageDie: '1d4',
+        damageType: 'perfurante',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, se você acertar e causar dano a uma criatura ameaçada pela tarântula, o alvo precisa passar em um teste plano CD 5 sempre que usar ação de concentração, ou a ação é perdida.',
+    advancedManeuver: {
+      name: 'Rajada de Pelos',
+      originalName: 'Hair Barrage',
+      actionType: 'two',
+      description:
+        'Cone de 4,5 m: 4d6 perfurante (salvaguarda básica de Reflexos). CD treinada com DES, ou especialista se especializada. +1d6 a cada 4 níveis seus acima do 6º.',
+    },
+  },
+  {
+    id: 'companion-roc',
+    name: 'Roca',
+    originalName: 'Roc',
+    description:
+      'Exemplar jovem da lendária ave de rapina. Companheiro avançado.',
+    source: 'Howl of the Wild pg. 95',
+    size: 'huge',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 1, 3, -4, 1, 0),
+    ancestryHitPoints: 8,
+    skill: 'intimidation',
+    senses: ['visão na penumbra'],
+    speeds: { land: 15, fly: 60 },
+    isMount: true,
+    minLevel: 16,
+    special: 'Incomum. Montaria. Avançado: nível 16+. Garras: Agarrar.',
+    attacks: [
+      {
+        id: 'roc-beak',
+        name: 'Bico',
+        originalName: 'beak',
+        traits: [],
+        damageDie: '1d10',
+        damageType: 'perfurante',
+      },
+      {
+        id: 'roc-talon',
+        name: 'Garras',
+        originalName: 'talon',
+        traits: ['ágil', 'agarrar'],
+        damageDie: '1d8',
+        damageType: 'cortante',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, seus Golpes que danificam uma criatura ameaçada pela roca empurram o alvo 1,5 m para longe dela.',
+    advancedManeuver: {
+      name: 'Arrebatar',
+      originalName: 'Snatch',
+      actionType: 'two',
+      description:
+        'Golpeia com as garras e tenta Agarrar. Se conseguir, Voa até metade da Velocidade levando a criatura.',
+    },
+  },
+  {
+    id: 'companion-salamander',
+    name: 'Salamandra',
+    originalName: 'Salamander',
+    description:
+      'Salamandra, tritão, axolote ou anfíbio similar.',
+    source: 'Howl of the Wild pg. 92',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 2, 2, -4, 1, 1),
+    ancestryHitPoints: 6,
+    skill: 'survival',
+    senses: ['visão no escuro'],
+    speeds: { land: 20, swim: 10 },
+    attacks: [
+      {
+        id: 'salamander-tail',
+        name: 'Cauda',
+        originalName: 'tail',
+        traits: [],
+        damageDie: '1d6',
+        damageType: 'contundente',
+      },
+      {
+        id: 'salamander-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: [],
+        damageDie: '1d4',
+        damageType: 'perfurante',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, se você ou a salamandra forem atingidos por uma criatura adjacente a ela, essa criatura sofre 1d6 de veneno (2d6 se ágil ou feroz).',
+    advancedManeuver: {
+      name: 'Varredura Venenosa',
+      originalName: 'Poisonous Sweep',
+      actionType: 'one',
+      description:
+        'Golpe de cauda. Se acertar, o alvo sofre +1d6 de veneno persistente (2d6 se ágil ou feroz). (Traços floreio e veneno.)',
+    },
+  },
+  {
+    id: 'companion-shotalashu',
+    name: 'Shotalashu',
+    originalName: 'Shotalashu',
+    description:
+      'Criatura telepática de Castrovel. Tem o traço besta em vez de animal. Exige vínculo de uma semana e teste de Ocultismo CD 21.',
+    source: 'Howl of the Wild pg. 92',
+    size: 'medium',
+    traits: ['besta', 'minion'],
+    attributes: attrs(2, 3, 2, -3, 1, 2),
+    ancestryHitPoints: 8,
+    skill: 'survival',
+    senses: ['visão no escuro'],
+    speeds: { land: 40 },
+    isMount: true,
+    special:
+      'Incomum. Montaria. Tamanho jovem: Médio ou Grande. Vínculo telepático (não pode formar outro até um dos dois morrer).',
+    attacks: [
+      {
+        id: 'shotalashu-claw',
+        name: 'Garra',
+        originalName: 'claw',
+        traits: ['ágil'],
+        damageDie: '1d6',
+        damageType: 'cortante',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, cada vez que você acertar uma criatura no alcance do shotalashu com um Golpe, ela sofre 1d6 de dano mental (2d6 se ágil ou feroz).',
+    advancedManeuver: {
+      name: 'Salto Telepático',
+      originalName: 'Telepathic Pounce',
+      actionType: 'two',
+      description:
+        'Uma criatura em até 9 m faz salvaguarda de Vontade (CD treinada com CAR, ou especialista se especializado). Sucesso crítico: nada. Sucesso: −1,5 m de status nas Velocidades por 1 rodada. Falha: −3 m e o shotalashu pode Saltar. Falha crítica: desprevenido e imobilizado por 1 rodada; o shotalashu pode Saltar.',
+    },
+  },
+  {
+    id: 'companion-umbrella-mushroom',
+    name: 'Cogumelo-guarda-chuva',
+    originalName: 'Umbrella Mushroom',
+    description:
+      'Cogumelo de chapéu largo que flutua em correntes de ar. Traço fungo em vez de animal. Companheiro avançado.',
+    source: 'Howl of the Wild pg. 95',
+    size: 'large',
+    traits: ['fungo', 'minion'],
+    attributes: attrs(2, 2, 3, -4, 1, 0),
+    ancestryHitPoints: 6,
+    skill: 'stealth',
+    senses: ['visão na penumbra'],
+    speeds: { land: 15, fly: 30 },
+    isMount: true,
+    minLevel: 14,
+    special:
+      'Incomum. Montaria. Avançado: nível 14+. Ao Comandar, ganha 1 reação só para Flutuar.',
+    attacks: [
+      {
+        id: 'mushroom-stalk',
+        name: 'Caule',
+        originalName: 'stalk',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'contundente',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, seus Golpes que danificam uma criatura no alcance do cogumelo deixam o alvo estupefato 1 por 1 rodada (traço veneno).',
+    advancedManeuver: {
+      name: 'Flutuar',
+      originalName: 'Float',
+      actionType: 'reaction',
+      requirements: 'Gatilho: o cogumelo está caindo.',
+      description:
+        'Infla bexigas de ar e reduz a queda a 18 m por rodada. Pode usar esta reação mesmo inconsciente.',
+    },
+  },
+  {
+    id: 'companion-air-elemental',
+    name: 'Elemental do Ar',
+    originalName: 'Air Elemental',
+    description:
+      'Seu companheiro é um elemental do ar, como um falcão zéfiro.',
+    source: 'Rage of Elements pg. 40',
+    size: 'small',
+    traits: ['elemental', 'ar', 'minion'],
+    attributes: attrs(1, 2, 1, -4, 1, 1),
+    ancestryHitPoints: 4,
+    skill: 'stealth',
+    senses: ['visão no escuro'],
+    speeds: { fly: 50 },
+    special: 'Incomum. Acesso: ordem da tempestade.',
+    attacks: [
+      {
+        id: 'air-gust',
+        name: 'Rajada',
+        originalName: 'gust',
+        traits: ['finesse'],
+        damageDie: '1d6',
+        damageType: 'contundente',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, se você acertar um Golpe e causar dano a uma criatura no alcance do elemental, você fica oculto para essa criatura até o início do seu próximo turno.',
+    advancedManeuver: {
+      name: 'Sobrevoo Circular',
+      originalName: 'Circling Flyby',
+      actionType: 'two',
+      description:
+        'Voa até metade da Velocidade, faz dois Golpes de rajada, então Voa até metade da Velocidade de volta ao ponto inicial. Ambos os ataques contam para o MAP, mas a penalidade só aumenta depois dos dois.',
+    },
+  },
+  {
+    id: 'companion-earth-elemental',
+    name: 'Elemental da Terra',
+    originalName: 'Earth Elemental',
+    description:
+      'Seu companheiro é um elemental da terra, como um pedregulho vivo ou cão de relva.',
+    source: 'Rage of Elements pg. 40',
+    size: 'small',
+    traits: ['elemental', 'terra', 'minion'],
+    attributes: attrs(2, 0, 3, -4, 1, 0),
+    ancestryHitPoints: 10,
+    skill: 'survival',
+    senses: ['visão no escuro'],
+    speeds: { land: 20, burrow: 10 },
+    special: 'Incomum. Acesso: ordem da pedra.',
+    attacks: [
+      {
+        id: 'earth-fist',
+        name: 'Punho',
+        originalName: 'fist',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'contundente',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, se você acertar um Golpe e causar dano a uma criatura no alcance do elemental, o primeiro quadrado para o qual ela se mover após o dano é terreno difícil.',
+    advancedManeuver: {
+      name: 'Rolamento Derrubador',
+      originalName: 'Rolling Knockdown',
+      actionType: 'two',
+      description:
+        'Avança até 3 m e faz um Golpe de punho. Se acertar, o alvo também cai de bruços.',
+    },
+  },
+  {
+    id: 'companion-fire-elemental',
+    name: 'Elemental do Fogo',
+    originalName: 'Fire Elemental',
+    description:
+      'Seu companheiro é um elemental do fogo, como um rato de cinzas ou lontra de lava.',
+    source: 'Rage of Elements pg. 40',
+    size: 'small',
+    traits: ['elemental', 'fogo', 'minion'],
+    attributes: attrs(2, 2, 1, -4, 1, 0),
+    ancestryHitPoints: 4,
+    skill: 'intimidation',
+    senses: ['visão no escuro'],
+    speeds: { land: 25 },
+    special:
+      'Incomum. Acesso: ordem da chama. Imunidade a fogo. Fraquezas a frio e água iguais ao nível do elemental.',
+    attacks: [
+      {
+        id: 'fire-tendril',
+        name: 'Tentáculo',
+        originalName: 'tendril',
+        traits: ['ágil', 'finesse'],
+        damageDie: '1d6',
+        damageType: 'fogo',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, seus Golpes que danificam uma criatura no alcance do elemental também causam 1d6 de fogo persistente (2d6 se ágil ou feroz).',
+    advancedManeuver: {
+      name: 'Lança-chamas',
+      originalName: 'Flamethrower',
+      actionType: 'two',
+      description:
+        '1× a cada 10 minutos: faz um Golpe de tentáculo contra todas as criaturas em uma linha de 18 m, mesmo fora do alcance. Todos os Golpes contam para o MAP, mas a penalidade só aumenta depois de todos.',
+    },
+  },
+  {
+    id: 'companion-metal-elemental',
+    name: 'Elemental do Metal',
+    originalName: 'Metal Elemental',
+    description:
+      'Seu companheiro é um elemental do metal, como um mercurial. Druidas não têm ordem de metal; no Society, qualquer druida com companheiro animal pode escolhê-lo.',
+    source: 'Rage of Elements pg. 41',
+    size: 'small',
+    traits: ['elemental', 'metal', 'minion'],
+    attributes: attrs(2, 1, 2, -4, 1, 0),
+    ancestryHitPoints: 8,
+    skill: 'intimidation',
+    senses: ['visão no escuro'],
+    speeds: { land: 25 },
+    special: 'Incomum. Sem restrição de ordem de druida.',
+    attacks: [
+      {
+        id: 'metal-spike',
+        name: 'Espinho',
+        originalName: 'spike',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, seus Golpes que danificam uma criatura no alcance do elemental também causam 1d6 de sangramento persistente (2d6 se ágil ou feroz).',
+    advancedManeuver: {
+      name: 'Bunker Espinhoso',
+      originalName: 'Spiked Bunker',
+      actionType: 'one',
+      description:
+        '+2 de circunstância à CA. Quem acertar o elemental com ataque desarmado corpo a corpo sofre 2d6 perfurante (3d6 se especializado). Não pode se mover, Golpear nem usar o corpo enquanto o bunker estiver ativo; retrair é 1 ação.',
+    },
+  },
+  {
+    id: 'companion-water-elemental',
+    name: 'Elemental da Água',
+    originalName: 'Water Elemental',
+    description:
+      'Seu companheiro é um elemental da água, como um tubarão de salmoura.',
+    source: 'Rage of Elements pg. 41',
+    size: 'small',
+    traits: ['elemental', 'água', 'minion'],
+    attributes: attrs(2, 2, 1, -4, 1, 0),
+    ancestryHitPoints: 6,
+    skill: 'survival',
+    senses: ['visão no escuro'],
+    speeds: { land: 15, swim: 35 },
+    special:
+      'Incomum. Acesso: ordem da onda. Resistência a fogo igual ao nível do elemental.',
+    attacks: [
+      {
+        id: 'water-wave',
+        name: 'Onda',
+        originalName: 'wave',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'contundente',
+      },
+    ],
+    supportBenefit:
+      'A primeira vez antes do início do seu próximo turno em que você acertar um Golpe que cause dano a uma criatura no alcance do elemental, ela fica desajeitada 1 até o fim do seu próximo turno.',
+    advancedManeuver: {
+      name: 'Encharcar',
+      originalName: 'Drench',
+      actionType: 'one',
+      description:
+        'Apaga todos os fogos em uma emanação de 1,5 m. Fogos não mágicos apagam automaticamente; fogos mágicos: tenta contrapor (modificador = modificador de ataque da onda, sem bônus extras de ataque).',
+    },
+  },
+  {
+    id: 'companion-wood-elemental',
+    name: 'Elemental da Madeira',
+    originalName: 'Wood Elemental',
+    description:
+      'Seu companheiro é um elemental da madeira, como uma preguiça-musgo.',
+    source: 'Rage of Elements pg. 41',
+    size: 'small',
+    traits: ['elemental', 'planta', 'madeira', 'minion'],
+    attributes: attrs(2, 1, 2, -4, 1, 0),
+    ancestryHitPoints: 8,
+    skill: 'survival',
+    senses: ['visão no escuro'],
+    speeds: { land: 25, climb: 25 },
+    special: 'Incomum. Acesso: ordem da folha.',
+    attacks: [
+      {
+        id: 'wood-branch',
+        name: 'Galho',
+        originalName: 'branch',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'contundente',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, se você acertar um Golpe que cause dano a uma criatura no alcance do elemental, ela sofre −1,5 m de circunstância nas Velocidades por 1 minuto (−3 m em sucesso crítico). A criatura ou uma adjacente pode Interagir para desfazer galhos e raízes e remover a penalidade.',
+    advancedManeuver: {
+      name: 'Galhos Agarradores',
+      originalName: 'Grabbing Branches',
+      actionType: 'two',
+      description:
+        'Golpe de galho; em sucesso, o alvo também fica agarrado até o fim do seu próximo turno, salvo se o elemental se mover ou o alvo Escapar.',
+    },
+  },
+  {
+    id: 'companion-durian-crab',
+    name: 'Caranguejo-durian',
+    originalName: 'Durian Crab',
+    description:
+      'Crustáceo assassino de Nagajor, Xa Hoi, Minata e da Selva Valashmai. Sobe em árvores e despenca sobre a presa, usando o ímpeto e os espinhos da carapaça.',
+    source: 'Tian Xia Character Guide pg. 122',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 2, 1, -4, 2, 0),
+    ancestryHitPoints: 6,
+    skill: 'stealth',
+    senses: ['visão no escuro'],
+    speeds: { land: 20, climb: 20, swim: 20 },
+    special: 'Tamanho jovem: Pequeno ou Médio.',
+    attacks: [
+      {
+        id: 'durian-claw',
+        name: 'Garra',
+        originalName: 'claw',
+        traits: ['ágil'],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, enquanto o caranguejo estiver no seu alcance, seus Golpes à distância que causam dano a uma criatura em até 9 m deixam o alvo desprevenido até o fim do seu próximo turno. O caranguejo volta ao espaço de onde foi arremessado logo após o Golpe, permitindo vários arremessos.',
+    advancedManeuver: {
+      name: 'Canhão-caranguejo',
+      originalName: 'Crab Cannon',
+      actionType: 'two',
+      description:
+        'Enrola-se numa bola e lança-se com a garra contra um alvo em até 6 m. Ao aterrissar, faz um Golpe de garra com dano contundente em vez de perfurante. Em acerto, o alvo fica ofuscado por 1 rodada e o Golpe causa +1d8 de dano (+2d8 se especializado).',
+    },
+  },
+  {
+    id: 'companion-hermit-krait',
+    name: 'Krait-eremita',
+    originalName: 'Hermit Krait',
+    description:
+      'Parece uma concha ocupada por cobras, mas é uma criatura reptiliana de várias cabeças. Tirá-lo da concha o mata.',
+    source: 'Tian Xia Character Guide pg. 122',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 3, 2, -4, 1, 0),
+    ancestryHitPoints: 6,
+    skill: 'stealth',
+    senses: ['visão na penumbra', 'faro (impreciso, 9 m)'],
+    speeds: { land: 20, burrow: 15, swim: 20 },
+    attacks: [
+      {
+        id: 'krait-fangs',
+        name: 'Presas',
+        originalName: 'fangs',
+        traits: ['ágil', 'finesse'],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, seus Golpes que danificam uma criatura no alcance do krait também causam 1d6 de veneno persistente (2d6 se ágil ou feroz).',
+    advancedManeuver: {
+      name: 'Enrolar Defensivo',
+      originalName: 'Defensive Curl',
+      actionType: 'one',
+      description:
+        'Recolhe as cabeças na concha: +2 de circunstância à CA e +4 de circunstância em testes para fingir ser uma concha comum. Quem acertar o krait com ataque desarmado corpo a corpo sofre 2d6 de veneno persistente. Não pode se mover nem usar membros enquanto enrolado; sair da concha é 1 ação.',
+    },
+  },
+  {
+    id: 'companion-sundaflora',
+    name: 'Sundaflora',
+    originalName: 'Sundaflora',
+    description:
+      'Criatura bípede com escamas em pétalas coloridas. Rara; mais comum nos jardins artificiais de Goka, onde passeia de mãos dadas, pensativa.',
+    source: 'Tian Xia Character Guide pg. 122',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 3, 1, -4, 1, 1),
+    ancestryHitPoints: 6,
+    skill: 'performance',
+    senses: ['visão na penumbra', 'faro (impreciso, 9 m)'],
+    speeds: { land: 20, swim: 15 },
+    special: 'Incomum. Acesso PFS: personagens de Tian Xia.',
+    attacks: [
+      {
+        id: 'sundaflora-tail',
+        name: 'Cauda-clava',
+        originalName: 'clubbed tail',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'contundente',
+      },
+      {
+        id: 'sundaflora-claws',
+        name: 'Garras',
+        originalName: 'claws',
+        traits: ['ágil'],
+        damageDie: '1d6',
+        damageType: 'cortante',
+      },
+    ],
+    supportBenefit:
+      'Escolha um aliado em até 9 m da sundaflora. Ele ganha +1 de circunstância no próximo teste de ataque para Golpear um inimigo no alcance dela. O bônus dura até ser usado ou até o início do seu próximo turno.',
+    advancedManeuver: {
+      name: 'Dança das Flores',
+      originalName: 'Flower Dance',
+      actionType: 'two',
+      description:
+        'Ergue-se e dança para distrair. Tenta Fintar o alvo usando Performance no lugar de Enganação. Em sucesso (ou crítico), o alvo fica desprevenido a você, não à sundaflora.',
+    },
+  },
+  {
+    id: 'companion-tikar-urchinpad',
+    name: 'Urchinpad Tikar',
+    originalName: 'Tikar Urchinpad',
+    description:
+      'Parece uma água-viva com cabeça de planta flutuante. Usa tentáculos viscosos contra quem tenta descansar no “tapete”. Em águas paradas, parece só um mosaico colorido na superfície.',
+    source: 'Tian Xia Character Guide pg. 123',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 3, 2, -4, 1, 0),
+    ancestryHitPoints: 6,
+    skill: 'stealth',
+    senses: ['faro (preciso, 3 m)'],
+    speeds: { land: 10, swim: 40 },
+    special: 'Tamanho jovem: Pequeno ou Médio.',
+    attacks: [
+      {
+        id: 'tikar-tendril',
+        name: 'Tentáculo',
+        originalName: 'tendril',
+        traits: ['ágil', 'finesse'],
+        damageDie: '1d6',
+        damageType: 'cortante',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o fim do seu próximo turno, enquanto você estiver adjacente ao urchinpad, se você Empurrar ou Derrubar e obtiver falha crítica, o resultado vira falha.',
+    advancedManeuver: {
+      name: 'Tentáculos Envolventes',
+      originalName: 'Wrapping Tendrils',
+      actionType: 'one',
+      description:
+        'Faz outro Golpe de tentáculo contra o mesmo alvo. Se acertar, o alvo também fica agarrado, como se o urchinpad tivesse Agarrado com sucesso.',
+    },
+  },
+  {
+    id: 'companion-yzobu',
+    name: 'Yzobu',
+    originalName: 'Yzobu',
+    description:
+      'Equino grande do nordeste de Tian Xia (Hongal até Quain e Po Li). Rebanhos nômades; usado como montaria e gado apesar do fedor.',
+    source: 'Tian Xia Character Guide pg. 123',
+    size: 'large',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 2, 2, -4, 1, 0),
+    ancestryHitPoints: 8,
+    skill: 'survival',
+    senses: ['visão na penumbra', 'faro (impreciso, 9 m)'],
+    speeds: { land: 40 },
+    isMount: true,
+    special: 'Montaria.',
+    attacks: [
+      {
+        id: 'yzobu-horn',
+        name: 'Chifre',
+        originalName: 'horn',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+      },
+      {
+        id: 'yzobu-hoof',
+        name: 'Casco',
+        originalName: 'hoof',
+        traits: ['ágil'],
+        damageDie: '1d6',
+        damageType: 'contundente',
+      },
+    ],
+    supportBenefit:
+      'A próxima criatura a fazer um ataque corpo a corpo contra o yzobu ou o cavaleiro antes do início do seu próximo turno é atingida pelo fedor e faz salvaguarda de Fortitude (CD de classe ou de magia, a maior). Em falha, −2 de circunstância no teste de ataque. Traço olfativo.',
+    advancedManeuver: {
+      name: 'Estouro Furioso',
+      originalName: 'Raging Stampede',
+      actionType: 'two',
+      description:
+        'Avança e faz um Golpe de chifre. Se acertar, o alvo é empurrado 3 m.',
+    },
+  },
+  {
+    id: 'companion-cephalopod',
+    name: 'Cefalópode',
+    originalName: 'Cephalopod',
+    description:
+      'Seu companheiro é um polvo, lula, náutilo ou outro cefalópode.',
+    source: 'High Seas pg. 109',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 3, 2, -4, 1, 0),
+    ancestryHitPoints: 6,
+    skill: 'stealth',
+    senses: ['visão na penumbra'],
+    speeds: { land: 10, swim: 30 },
+    attacks: [
+      {
+        id: 'ceph-beak',
+        name: 'Bico',
+        originalName: 'beak',
+        traits: ['finesse'],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+        finesse: true,
+      },
+      {
+        id: 'ceph-arm',
+        name: 'Braço',
+        originalName: 'arm',
+        traits: ['ágil', 'finesse'],
+        damageDie: '1d4',
+        damageType: 'contundente',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, se você acertar e causar dano a uma criatura no alcance do cefalópode, ela sofre −1 de circunstância nos ataques até o início do seu próximo turno.',
+    advancedManeuver: {
+      name: 'Abraço Esmagador',
+      originalName: 'Crushing Embrace',
+      actionType: 'two',
+      description:
+        'Envolve o alvo com tentáculos. Golpe de braço; se acertar, o alvo fica automaticamente agarrado e sofre 1d6 contundente (2d6 se ágil ou feroz).',
+    },
+  },
+  {
+    id: 'companion-iridescent-salamander',
+    name: 'Salamandra Iridescente',
+    originalName: 'Iridescent Salamander',
+    description:
+      'Anfíbio grande que usa a pele reflexiva e mutável para confundir inimigos. Distinta da salamandra de Howl of the Wild.',
+    source: 'High Seas pg. 109',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 3, 2, -4, 1, 0),
+    ancestryHitPoints: 6,
+    skill: 'survival',
+    senses: ['visão no escuro'],
+    speeds: { land: 20, climb: 20, swim: 20 },
+    attacks: [
+      {
+        id: 'irid-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: ['finesse'],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, se você acertar e causar dano a uma criatura adjacente à salamandra, ela fica ofuscada até o início do seu próximo turno, salvo se o nível dela for maior que o seu.',
+    advancedManeuver: {
+      name: 'Redemoinho de Cores',
+      originalName: 'Color Swirl',
+      actionType: 'two',
+      description:
+        'Muda de cor num padrão vertiginoso. Uma criatura em até 9 m faz salvaguarda de Fortitude (CD de classe ou de magia, a maior). Falha: enjoada 1. Falha crítica: enjoada 2.',
+    },
+  },
+  {
+    id: 'companion-pufferfish',
+    name: 'Baiacu',
+    originalName: 'Pufferfish',
+    description:
+      'Peixe redondo que infla o corpo, coberto de espinhos afiados.',
+    source: 'High Seas pg. 109',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 3, 1, -4, 1, 1),
+    ancestryHitPoints: 4,
+    skill: 'intimidation',
+    senses: ['visão na penumbra'],
+    speeds: { swim: 35 },
+    special:
+      'O Golpe de espinhos causa +1d4 de veneno (+2d4 se especializado).',
+    attacks: [
+      {
+        id: 'puffer-spines',
+        name: 'Espinhos',
+        originalName: 'spines',
+        traits: ['finesse'],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, seus Golpes que danificam uma criatura no alcance do baiacu também causam 1d6 de veneno persistente (2d6 se ágil ou feroz).',
+    advancedManeuver: {
+      name: 'Investida Farpada',
+      originalName: 'Barbed Dash',
+      actionType: 'two',
+      description:
+        'Infla e tenta Passar por um inimigo. Em sucesso, causa 1 perfurante e 1d6 de veneno persistente ao atravessar o espaço (2d6 se ágil ou feroz).',
+    },
+  },
+  {
+    id: 'companion-silt-frog',
+    name: 'Sapo-de-lodo',
+    originalName: 'Silt Frog',
+    description:
+      'Sapo enorme que detecta magia — sua principal fonte de alimento.',
+    source: 'High Seas pg. 109',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 2, 2, -4, 1, 0),
+    ancestryHitPoints: 6,
+    skill: 'stealth',
+    senses: [
+      'visão na penumbra',
+      'sentido mágico (impreciso, 9 m)',
+    ],
+    speeds: { land: 25, burrow: 15, swim: 25 },
+    attacks: [
+      {
+        id: 'silt-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: [],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+      },
+      {
+        id: 'silt-tongue',
+        name: 'Língua',
+        originalName: 'tongue',
+        traits: ['alcance 3 m'],
+        damageDie: '1d4',
+        damageType: 'contundente',
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, se você acertar e causar dano a uma criatura no alcance do sapo, ela fica surda até o início do seu próximo turno.',
+    advancedManeuver: {
+      name: 'Ingerir Magia',
+      originalName: 'Ingest Magic',
+      actionType: 'two',
+      description:
+        'Golpe de mandíbulas. Se acertar, tenta contrapor uma magia ou efeito mágico no alvo (modificador = modificador de ataque da língua, sem bônus extras de ataque; posto de contrapôr = metade do nível, arredondado para cima).',
+    },
+  },
+  {
+    id: 'companion-oozeform-chair',
+    name: 'Cadeira-gosma',
+    originalName: 'Oozeform Chair',
+    description:
+      'Gosma alquímica que se move com pseudópodes e serve de assento.',
+    source: 'Treasure Vault (Remastered) pg. 106',
+    size: 'medium',
+    traits: ['gosma', 'minion'],
+    attributes: attrs(3, 2, 3, -4, 0, 0),
+    ancestryHitPoints: 6,
+    skill: 'athletics',
+    senses: ['sentido de movimento (impreciso, 9 m)'],
+    speeds: { land: 20 },
+    isMount: true,
+    special: 'Montaria. Tamanho jovem: Médio ou Grande.',
+    attacks: [
+      {
+        id: 'ooze-pseudopod',
+        name: 'Pseudópode',
+        originalName: 'pseudopod',
+        traits: ['ágil'],
+        damageDie: '1d6',
+        damageType: 'contundente',
+      },
+    ],
+    supportBenefit:
+      'Um pseudópode busca um objeto sem dono em até 4,5 m. Se você não tiver mão livre, a cadeira larga o objeto no seu espaço.',
+    advancedManeuver: {
+      name: 'Estender Pseudópode',
+      originalName: 'Extend Pseudopod',
+      actionType: 'one',
+      description:
+        'Alonga-se: o Golpe de pseudópode ganha alcance 3 m até o início do seu próximo turno.',
+    },
+  },
+  {
+    id: 'companion-rootball-chair',
+    name: 'Cadeira-raiz',
+    originalName: 'Rootball Chair',
+    description:
+      'Esfera viva de raízes que rola pelo chão, com um assento estável em cima.',
+    source: 'Treasure Vault (Remastered) pg. 107',
+    size: 'medium',
+    traits: ['planta', 'minion'],
+    attributes: attrs(2, 2, 3, -4, 1, 0),
+    ancestryHitPoints: 8,
+    skill: 'stealth',
+    senses: ['visão na penumbra'],
+    speeds: { land: 30 },
+    isMount: true,
+    special: 'Montaria. Tamanho jovem: Médio ou Grande.',
+    attacks: [
+      {
+        id: 'root-vine',
+        name: 'Cipó',
+        originalName: 'vine',
+        traits: ['alcance 3 m'],
+        damageDie: '1d8',
+        damageType: 'cortante',
+      },
+    ],
+    supportBenefit:
+      'Estende gavinhas e ignora terreno difícil até o fim do turno, então Avança.',
+    advancedManeuver: {
+      name: 'Mola de Semente',
+      originalName: 'Seedpod Spring',
+      actionType: 'two',
+      description:
+        'Uma vagem estoura e solta um tufo algodoado. A cadeira Salta até 9 m na vertical ou horizontal e desce em queda lenta (desce 1,5 m a cada 1,5 m na horizontal); você não sofre dano de queda. O tufo se dispersa ao aterrissar.',
+    },
+  },
+  {
+    id: 'companion-bacallia',
+    name: 'Bacallia',
+    originalName: 'Bacallia',
+    description:
+      'Animal de carga parecido com alpaca, criado pelo pelame lustroso. Acesso típico: Druma.',
+    source: 'Shining Kingdoms pg. 77',
+    size: 'medium',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 2, 2, -4, 1, 1),
+    ancestryHitPoints: 8,
+    skill: 'survival',
+    senses: ['visão na penumbra'],
+    speeds: { land: 40 },
+    isMount: true,
+    special:
+      'Incomum. Montaria. Ignora os efeitos nocivos de frio ou calor (leve, severo e extremo) — escolha um ao ganhar o companheiro.',
+    attacks: [
+      {
+        id: 'bacallia-foot',
+        name: 'Pata',
+        originalName: 'foot',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'contundente',
+      },
+    ],
+    supportBenefit:
+      'O pelame brilhante reflete luz nos olhos do inimigo. Até o início do seu próximo turno, criaturas no alcance da bacallia que você danificar com Golpes ficam ofuscadas.',
+    advancedManeuver: {
+      name: 'Cuspe',
+      originalName: 'Spit',
+      actionType: 'one',
+      description:
+        'Floreio. Golpe à distância de cuspe: 1d6 ácido, incremento de 3 m (2d6 se madura, 3d6 se especializada). Criatura viva atingida também fica enjoada 1 (enjoada 2 no crítico).',
+    },
+  },
+  {
+    id: 'companion-gray-bladeling',
+    name: 'Laminídeo Cinzento',
+    originalName: 'Gray Bladeling',
+    description:
+      'Construto vago humanóide de lâminas afiadas, animado por fragmentos de almas inquietas — um gray death em miniatura. Sem identidade nem memórias; ódio poderoso e sem foco que o mestre às vezes luta para controlar.',
+    source: 'Shining Kingdoms pg. 123',
+    size: 'small',
+    traits: ['construto', 'morto-vivo', 'minion'],
+    attributes: attrs(2, 1, 2, -4, 0, 1),
+    ancestryHitPoints: 10,
+    skill: 'athletics',
+    senses: ['visão no escuro', 'sentido vital impreciso 9 m'],
+    speeds: { land: 20 },
+    special:
+      'Raro. Acesso: você é de Galt. Traços construto e morto-vivo no lugar de animal. Imune a sangramento, efeitos de morte, doença, condenado, drenado, fatigado, cura, ataques não letais, paralisado, veneno e enjoado. Cura do vazio. Ao contrário da maioria dos mortos-vivos, fica inconsciente e morrendo a 0 PV (não é destruído na hora). Ao contrário da maioria dos construtos, só recupera PV com cura do vazio.',
+    attacks: [
+      {
+        id: 'bladeling-blade',
+        name: 'Lâmina',
+        originalName: 'blade',
+        traits: ['ágil', 'finesse'],
+        damageDie: '1d8',
+        damageType: 'cortante',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Até o início do seu próximo turno, cada vez que você acertar uma criatura no alcance do laminídeo com um Golpe, ela sofre 1d4 de sangramento persistente — ou fica amedrontada 1 se já estiver sangrando. Se especializado, o sangramento sobe para 1d8.',
+    advancedManeuver: {
+      name: 'Golpe Possessivo',
+      originalName: 'Possessing Strike',
+      actionType: 'two',
+      description:
+        '1× por hora (maldição, mental, oculto). Golpe de lâmina contra criatura viva; se causar dano, Vontade (CD de classe ou de magia, a maior). Imunidade temporária 24 h. Sucesso crítico: nada. Sucesso: atordoado 1. Falha: confuso 1 rodada e não pode usar ações ofensivas contra você ou o laminídeo. Falha crítica: o mesmo, mas se o alvo sofrer dano de ataque ou magia a CD do teste simples para sair da confusão é 15.',
+    },
+  },
+  {
+    id: 'companion-cragstone-bear',
+    name: 'Urso de Rocha',
+    originalName: 'Cragstone Bear',
+    description:
+      'Urso de caverna de quatro patas; a água mineral faz placas de pedra crescerem no pelame. Brincalhão e energético, mais cão leal do que urso-pardo — mas o couro rochoso torna as brincadeiras mais bruscas do que o previsto.',
+    source: 'Shining Kingdoms pg. 99',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 1, 3, -4, 1, 0),
+    ancestryHitPoints: 8,
+    skill: 'survival',
+    senses: ['visão no escuro', 'sentido sísmico impreciso 6 m'],
+    speeds: { land: 35 },
+    special: 'Incomum. Acesso típico: Cinco Montanhas-Rei.',
+    attacks: [
+      {
+        id: 'cragstone-slam',
+        name: 'Pancada',
+        originalName: 'slam',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'contundente',
+      },
+      {
+        id: 'cragstone-claw',
+        name: 'Garra',
+        originalName: 'claw',
+        traits: ['ágil'],
+        damageDie: '1d6',
+        damageType: 'cortante',
+      },
+    ],
+    supportBenefit:
+      'Defende você com entusiasmo. Até o início do seu próximo turno, você ganha +1 de circunstância na CA se o urso estiver adjacente. Ágil ou feroz: o bônus sobe para +2.',
+    advancedManeuver: {
+      name: 'Investida Rolante',
+      originalName: 'Rolling Charge',
+      actionType: 'two',
+      description:
+        'Enrola-se numa bola e Avança duas vezes em linha reta. Pode fazer um Golpe de pancada contra uma criatura adjacente em qualquer ponto do movimento. No crítico, o alvo também cai no chão.',
+    },
+  },
+  {
+    id: 'companion-giant-rock-tuatara',
+    name: 'Tuatara-rocha Gigante',
+    originalName: 'Giant Rock Tuatara',
+    description:
+      'Primo bem maior do tuatara-rocha comum: até 1,8 m de comprimento e 1,2 m de altura. Terceiro olho branco-leitoso, dorso espinhoso e cauda em clava — parece mais feroz do que costuma ser.',
+    source: 'Shining Kingdoms pg. 100',
+    size: 'medium',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 2, 2, -4, 1, 0),
+    ancestryHitPoints: 8,
+    skill: 'intimidation',
+    senses: ['visão no escuro', 'faro impreciso 9 m'],
+    speeds: { land: 25 },
+    special: 'Incomum. Acesso típico: Cinco Montanhas-Rei.',
+    attacks: [
+      {
+        id: 'tuatara-tail',
+        name: 'Pancada de Cauda',
+        originalName: 'tail slam',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'contundente',
+      },
+      {
+        id: 'tuatara-bite',
+        name: 'Mordida',
+        originalName: 'bite',
+        traits: [],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+      },
+    ],
+    supportBenefit:
+      'Derruba o equilíbrio dos inimigos. Até o início do seu próximo turno, seus Golpes que causam dano a uma criatura no alcance do tuatara deixam o alvo desajeitado 1 até o fim do seu próximo turno.',
+    advancedManeuver: {
+      name: 'Fuga de Cauda',
+      originalName: 'Tail Escape',
+      actionType: 'one',
+      requirements: 'O tuatara está agarrado ou imobilizado.',
+      description:
+        '1× a cada 10 minutos. Solta a cauda e Escapa automaticamente, então dá um Passo. Não pode usar Pancada de Cauda até regenerar a cauda (10 minutos ou magia de cura que restaure PV).',
+    },
+  },
+  {
+    id: 'companion-keulia',
+    name: 'Keulia',
+    originalName: 'Keulia',
+    description:
+      'Lagarto com babado e chifres, “casco” de detritos que pode incluir metais preciosos e gemas. Acesso típico: Druma.',
+    source: 'Shining Kingdoms pg. 77',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 2, 3, -4, 1, 0),
+    ancestryHitPoints: 4,
+    skill: 'thievery',
+    senses: ['visão na penumbra'],
+    speeds: { land: 30, burrow: 10 },
+    special: 'Incomum. Acesso típico: Druma.',
+    attacks: [
+      {
+        id: 'keulia-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: [],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+      },
+    ],
+    supportBenefit:
+      'Com o casco duro, investe nos inimigos. Até o início do seu próximo turno, cada vez que você acertar uma criatura no alcance da keulia com um Golpe e causar dano físico, ela sofre 1d8 contundente extra. Ágil ou feroz: 2d8.',
+    advancedManeuver: {
+      name: 'Salto de Lagarto',
+      originalName: 'Lizard Leap',
+      actionType: 'two',
+      description:
+        'Salta e então faz um Golpe de mandíbulas. Se moveu pelo menos 3 m, o Golpe causa +1d6 perfurante (+2d6 se ágil ou feroz).',
+    },
+  },
+  {
+    id: 'companion-severed-head',
+    name: 'Cabeça Decepada',
+    originalName: 'Severed Head',
+    description:
+      'Cabeça morta-viva. A Revolução Vermelha deixou valas comuns em Galt; muitas cabeças foram levadas por necromantes como matéria-prima conveniente para servos simples.',
+    source: 'Shining Kingdoms pg. 123',
+    size: 'small',
+    traits: ['morto-vivo', 'minion', 'sem mente'],
+    attributes: attrs(2, 1, 3, -5, 0, 0),
+    ancestryHitPoints: 4,
+    skill: null,
+    senses: ['visão no escuro'],
+    speeds: { land: 15, fly: 25 },
+    special:
+      'Incomum. Acesso: você é de Galt. Traço morto-vivo no lugar de animal: cura do vazio; imune a efeitos de morte, doença e veneno. Sem mente.',
+    attacks: [
+      {
+        id: 'severed-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: ['finesse'],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Agarra o inimigo com as mandíbulas, distraindo e atrapalhando o movimento. A próxima criatura no alcance da cabeça que você acertar com um Golpe até o início do seu próximo turno sofre −1,5 m de status nas Velocidades e precisa passar num teste simples CD 5 para usar reações disparadas pelas suas ações até o início do seu próximo turno. Na falha, a reação é perdida.',
+    advancedManeuver: {
+      name: 'Roer',
+      originalName: 'Gnash',
+      actionType: 'one',
+      requirements: 'A última ação da cabeça foi um Golpe de mandíbulas bem-sucedido.',
+      description:
+        'Sacode-se com violência para arrancar um pedaço. Outro Golpe de mandíbulas no mesmo alvo; se acertar, causa 1d6 de sangramento persistente além do dano normal.',
+    },
+  },
+  {
+    id: 'companion-chetamog',
+    name: 'Chetamog',
+    originalName: 'Chetamog',
+    description:
+      'Roedor arborícola grande das árvores mais antigas da Floresta Verduran. Treinado, serve de montaria de combate — cavalaria que some no dossel.',
+    source: 'Pathfinder #201: Pactbreaker pg. 86',
+    size: 'medium',
+    traits: ['animal', 'minion'],
+    attributes: attrs(1, 3, 2, -4, 1, 0),
+    ancestryHitPoints: 8,
+    skill: 'survival',
+    senses: ['visão na penumbra', 'faro impreciso 9 m'],
+    speeds: { land: 40 },
+    isMount: true,
+    special: 'Montaria. Tamanho jovem: Médio ou Grande.',
+    attacks: [
+      {
+        id: 'chetamog-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+      },
+      {
+        id: 'chetamog-claw',
+        name: 'Garra',
+        originalName: 'claw',
+        traits: ['ágil'],
+        damageDie: '1d6',
+        damageType: 'cortante',
+      },
+    ],
+    supportBenefit:
+      'Ignora terreno difícil e terreno muito difícil de folhagem não mágica.',
+    advancedManeuver: {
+      name: 'Correria',
+      originalName: 'Scurry',
+      actionType: 'two',
+      description:
+        'Faz qualquer combinação de duas ações de Avançar ou Escalar, com +3 m de circunstância na Velocidade nesses Avanços.',
+    },
+  },
+  {
+    id: 'companion-riding-dragonet',
+    name: 'Dragonete de Montaria',
+    originalName: 'Riding Dragonet',
+    description:
+      'Dragonete sem voo, grande demais para levantar. Desconfiado com outros, mas inexplicavelmente apegado a você. Traço dragão no lugar de animal; funciona como companheiro animal.',
+    source: 'Draconic Codex pg. 221',
+    size: 'small',
+    traits: ['dragão', 'minion'],
+    attributes: attrs(1, 3, 2, -4, 1, 3),
+    ancestryHitPoints: 8,
+    skill: 'diplomacy',
+    senses: ['visão no escuro'],
+    speeds: { land: 30 },
+    isMount: true,
+    special: 'Incomum. Montaria.',
+    attacks: [
+      {
+        id: 'dragonet-claw',
+        name: 'Garra',
+        originalName: 'claw',
+        traits: ['finesse', 'mágico'],
+        damageDie: '1d8',
+        damageType: 'contundente',
+        finesse: true,
+      },
+      {
+        id: 'dragonet-tail',
+        name: 'Cauda',
+        originalName: 'tail',
+        traits: ['ágil', 'finesse', 'mágico'],
+        damageDie: '1d6',
+        damageType: 'cortante',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'As asas batem rápido e pulsam o ar. Até o início do seu próximo turno, cada vez que você Golpear montado e acertar uma criatura no alcance do dragonete, ela sofre 1d4 contundente das asas (2d4 se ágil ou feroz).',
+    advancedManeuver: {
+      name: 'Exalação Enfeitiçante',
+      originalName: 'Enamoring Exhalation',
+      actionType: 'two',
+      description:
+        '1× a cada 10 minutos (olfativo). Cone de 4,5 m de feromônios: cada criatura na área fica fascinada por você e pelo dragonete até o fim do seu próximo turno, salvo Fortitude. CD treinada com Carisma do dragonete (especialista se especializado).',
+    },
+  },
+  {
+    id: 'companion-isgeri-boarhound',
+    name: 'Cão-javali de Isger',
+    originalName: 'Isgeri Boarhound',
+    description:
+      'Gnomos de Umok criaram, por treino e seleção, cães-javali de Isger com faro excepcional e corpo robusto para patrulhar predadores extraplanares da região.',
+    source: 'Pathfinder #222: Hellbreakers pg. 215',
+    size: 'small',
+    traits: ['animal', 'minion'],
+    attributes: attrs(2, 3, 2, -4, 1, 0),
+    ancestryHitPoints: 6,
+    skill: 'survival',
+    senses: [
+      'faro de inimigo preciso 12 m',
+      'faro impreciso 12 m',
+    ],
+    speeds: { land: 40 },
+    special:
+      'Incomum. Nas preparações, ofereça uma amostra (osso, carne etc. das últimas 24 h) de inimigo com traço fiend ou morto-vivo: por 24 h esse traço é o inimigo designado. Faro de inimigo: sentido preciso de 12 m contra criaturas desse traço.',
+    attacks: [
+      {
+        id: 'boarhound-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: ['finesse'],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+        finesse: true,
+      },
+    ],
+    supportBenefit:
+      'Companheiro de caça fiel. +1 de circunstância no seu próximo teste de ataque para Golpear um inimigo no alcance do cão (até usar ou até o início do seu próximo turno). Se esse Golpe danificar uma criatura com o traço do inimigo designado, ela sofre +1d6 perfurante do cão (2d6 se ágil ou feroz).',
+    advancedManeuver: {
+      name: 'Travar Mandíbula',
+      originalName: 'Lock Jaw',
+      actionType: 'one',
+      requirements: 'A última ação do cão foi um Golpe de mandíbulas bem-sucedido.',
+      description:
+        'O alvo fica agarrado, como se o cão tivesse Agarrado com sucesso.',
+    },
+  },
+  {
+    id: 'companion-war-pig',
+    name: 'Porco de Guerra',
+    originalName: 'War Pig',
+    description:
+      'Orcs de Belkzen cruzaram porcos domesticados até criar montarias grandes o bastante para um orc armado, duronas o bastante para os ermos e indiscriminadas na dieta. Inteligentes e curiosos; sem enriquecimento, destroem hortas, grimórios e até alicerces.',
+    source: 'Pathfinder #208: Hoof, Cinder, and Storm pg. 79',
+    size: 'large',
+    traits: ['animal', 'minion'],
+    attributes: attrs(3, 1, 2, -4, 1, 1),
+    ancestryHitPoints: 8,
+    skill: 'intimidation',
+    senses: ['visão na penumbra', 'faro impreciso 9 m'],
+    speeds: { land: 35 },
+    isMount: true,
+    special: 'Montaria.',
+    attacks: [
+      {
+        id: 'warpig-hoof',
+        name: 'Casco',
+        originalName: 'hoof',
+        traits: ['ágil'],
+        damageDie: '1d6',
+        damageType: 'contundente',
+      },
+      {
+        id: 'warpig-tusk',
+        name: 'Presa',
+        originalName: 'tusk',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+      },
+    ],
+    supportBenefit:
+      'Empurra os inimigos e os deixa dormentes. Até o início do seu próximo turno, Golpes seus que causam dano a uma criatura no alcance do porco deixam o alvo desajeitado 1 até o fim do seu próximo turno.',
+    advancedManeuver: {
+      name: 'Frenesi de Coices',
+      originalName: 'Bucking Frenzy',
+      actionType: 'two',
+      description:
+        'Transforma medo em fúria. Reduz amedrontado em 1 (mín. 0), então faz Golpes de casco contra até três inimigos diferentes no alcance. Cada Golpe tem −2 no ataque, salvo se o porco começou o turno amedrontado. Os ataques contam para o MAP, mas a penalidade só aumenta depois de todos.',
+    },
+  },
+  {
+    id: 'companion-wyvern',
+    name: 'Wyvern',
+    originalName: 'Wyvern',
+    description:
+      'A maioria dos wyverns é orgulhosa demais para ser “pet”; os orcs perto de Wyvernsting os treinam como montarias voadoras. Esperam um tratador forte de corpo e mente. Companheiro avançado (nível 10+).',
+    source: 'Pathfinder #209: Destroyer\'s Doom pg. 81',
+    size: 'large',
+    traits: ['dragão', 'minion'],
+    attributes: attrs(2, 2, 2, -4, 1, 0),
+    ancestryHitPoints: 8,
+    skill: 'stealth',
+    senses: ['visão no escuro', 'faro impreciso 9 m'],
+    speeds: { land: 20, fly: 40 },
+    isMount: true,
+    minLevel: 10,
+    special:
+      'Incomum. Avançado (nv. 10+). O ferrão causa veneno extra igual a 1 + 1 por dado de dano da arma. Montaria instável: pode voar com cavaleiro só em rajadas curtas; se não terminar o turno no chão, desce 9 m sem dano de queda. No 14º nível, vira montaria normal (sem essa restrição).',
+    attacks: [
+      {
+        id: 'wyvern-stinger',
+        name: 'Ferrão',
+        originalName: 'stinger',
+        traits: [],
+        damageDie: '1d6',
+        damageType: 'perfurante',
+      },
+      {
+        id: 'wyvern-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+      },
+    ],
+    supportBenefit:
+      'Chicoteia o ferrão nos inimigos. Até o início do seu próximo turno, seus Golpes que danificam uma criatura no alcance do wyvern também causam 1d6 de veneno persistente (2d6 se ágil ou feroz).',
+    advancedManeuver: {
+      name: 'Estocada em Mergulho',
+      originalName: 'Diving Skewer',
+      actionType: 'two',
+      description:
+        'Voa até metade da Velocidade e faz um Golpe de ferrão. Se acertar, o alvo também cai no chão. No crítico, o alvo também sofre 2d6 de veneno persistente.',
+    },
+  },
+  {
+    id: 'companion-thruneosaurus-rex',
+    name: 'Thruneossauro Rex',
+    originalName: 'Thruneosaurus Rex',
+    description:
+      'Terópode poderoso infundido com a fúria do Inferno, criado por diabolistas de Cheliax. Poucos tratadores controlam a vontade da besta, quanto mais seus impulsos diabólicos. Companheiro avançado (nível 14+).',
+    source: "Pathfinder #223: Hell's Destiny pg. 229",
+    size: 'large',
+    traits: ['besta', 'minion'],
+    attributes: attrs(3, 1, 2, -3, 0, 2),
+    ancestryHitPoints: 8,
+    skill: 'intimidation',
+    senses: ['visão no escuro', 'faro impreciso 9 m'],
+    speeds: { land: 35 },
+    minLevel: 14,
+    special:
+      'Raro. Avançado (nv. 14+). Fiend recessivo: um tratador santificado pode suprimir ou despertar a influência fiend. Salvo se você for sagrado (holy), o dinossauro ganha o traço diabo. Se você for profano (unholy), o dinossauro, seus Golpes e a manobra avançada ganham o traço unholy.',
+    attacks: [
+      {
+        id: 'thruneo-jaws',
+        name: 'Mandíbulas',
+        originalName: 'jaws',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'perfurante',
+      },
+      {
+        id: 'thruneo-foot',
+        name: 'Pata',
+        originalName: 'foot',
+        traits: [],
+        damageDie: '1d8',
+        damageType: 'contundente',
+      },
+    ],
+    supportBenefit:
+      'Os chifres irradiam calor e inflamam inimigos distraídos. Até o início do seu próximo turno, seus Golpes que danificam uma criatura no alcance também causam 1d6 de fogo persistente (2d6 se ágil ou feroz).',
+    advancedManeuver: {
+      name: 'Olhar de Fogo Infernal',
+      originalName: 'Hellfire Gaze',
+      actionType: 'two',
+      description:
+        '1× por minuto. Os olhos projetam uma linha de fogo de 9 m: 1d6 de fogo por cada 2 níveis do thruneossauro (Reflexo básico). Falha crítica: também fogo persistente igual ao número de dados. CD treinada com Constituição (especialista se especializado).',
+    },
+  },
+]
+
+export const ANIMAL_COMPANION_TYPES_BY_ID = Object.fromEntries(
+  ANIMAL_COMPANION_TYPES.map((t) => [t.id, t]),
+) as Record<string, AnimalCompanionTypeDefinition>
+
+export function listAnimalCompanionTypes(): AnimalCompanionTypeDefinition[] {
+  return [...ANIMAL_COMPANION_TYPES].sort((a, b) =>
+    a.name.localeCompare(b.name, 'pt-BR'),
+  )
+}
+
+export function getAnimalCompanionType(
+  id: string | null | undefined,
+): AnimalCompanionTypeDefinition | null {
+  if (!id) return null
+  return ANIMAL_COMPANION_TYPES_BY_ID[id] ?? null
+}

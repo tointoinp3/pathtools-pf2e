@@ -1,0 +1,44 @@
+# Dependências e build
+node_modules
+dist
+dist-ssr
+*.local
+*.tsbuildinfo
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor / IA local (não precisa para o app rodar)
+.cursor/
+.claude/
+.idea
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Rascunhos e temporários
+_scratch/
+tmp_*
+tmp-*
+__pycache__/
+*.py[cod]
+.venv/
+
+# Pipeline de extração do Archives of Nethys:
+# dumps, cache, clone do Foundry e scripts one-off.
+# O app já traz o conteúdo em src/data — isso não é preciso para rodar.
+scripts/*
+!scripts/test-alias.mjs
+!scripts/check-pt-coverage.mjs

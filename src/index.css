@@ -1,0 +1,342 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface-0: #0a0c10;
+  --color-surface-1: #11151d;
+  --color-surface-2: #171c27;
+  --color-surface-3: #1e2431;
+  --color-surface-4: #272e3e;
+  --color-border: #31394c;
+  --color-border-strong: #46506a;
+  --color-text: #eef0f5;
+  --color-text-muted: #9aa3b8;
+  --color-text-dim: #6d768c;
+  --color-accent: #d4a84b;
+  --color-accent-hover: #e0b85c;
+  --color-accent-muted: #8f6f2a;
+  --color-danger: #d45454;
+  --color-danger-hover: #e06666;
+  --color-success: #4caf7a;
+  --color-info: #5b8def;
+  --color-crit: #f0c35a;
+  --color-fumble: #e07070;
+  --color-rarity-common: #9aa3b5;
+  --color-rarity-uncommon: #4caf7a;
+  --color-rarity-rare: #5b8def;
+  --color-rarity-unique: #c45ed1;
+  --font-sans: "Source Sans 3", "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-display: "Cinzel", "Times New Roman", serif;
+  --font-mono: "Cascadia Code", "Consolas", "Courier New", monospace;
+  --shadow-panel: 0 8px 28px rgba(0, 0, 0, 0.28);
+  --shadow-hover: 0 10px 24px rgba(0, 0, 0, 0.35);
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+  color-scheme: dark;
+  --color-accent-rgb: 212 168 75;
+  --portrait-stage: #12151c;
+  --checker-cell: #1a1f2a;
+  --notes-cork: #1a1510;
+}
+
+html[data-theme='light'] {
+  color-scheme: light;
+  --color-surface-0: #f3eee4;
+  --color-surface-1: #faf7f0;
+  --color-surface-2: #efe8d9;
+  --color-surface-3: #e6dcc8;
+  --color-surface-4: #d9cdb4;
+  --color-border: #d0c4aa;
+  --color-border-strong: #b8a888;
+  --color-text: #1c1914;
+  --color-text-muted: #5c564c;
+  --color-text-dim: #7a7368;
+  --color-accent: #9a6b18;
+  --color-accent-hover: #7d5612;
+  --color-accent-muted: #c4a056;
+  --color-danger: #c43c3c;
+  --color-danger-hover: #a83030;
+  --color-success: #2e8a58;
+  --color-info: #3a6fd4;
+  --color-crit: #a67c12;
+  --color-fumble: #c43c3c;
+  --color-rarity-common: #6d6570;
+  --color-rarity-uncommon: #2e8a58;
+  --color-rarity-rare: #3a6fd4;
+  --color-rarity-unique: #9a3aad;
+  --shadow-panel: 0 8px 28px rgba(40, 30, 16, 0.12);
+  --shadow-hover: 0 10px 24px rgba(40, 30, 16, 0.16);
+  --color-accent-rgb: 154 107 24;
+  --portrait-stage: #e8e0d0;
+  --checker-cell: #d4ccba;
+  --notes-cork: #cbb892;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Escala tipográfica (ajustável em Configurações / Ctrl+scroll) */
+  --app-ui-scale: 1;
+  font-size: calc(16px * var(--app-ui-scale));
+}
+
+/*
+ * text-[8px] / [9px] / [10px] / [11px] do Tailwind são pixels absolutos:
+ * não acompanham a escala da UI (html font-size em rem). Remapeia para rem.
+ */
+.text-\[8px\],
+.\!text-\[8px\] {
+  font-size: 0.5rem !important;
+}
+.text-\[9px\],
+.\!text-\[9px\] {
+  font-size: 0.5625rem !important;
+}
+.text-\[10px\],
+.\!text-\[10px\] {
+  font-size: 0.625rem !important;
+}
+.text-\[11px\],
+.\!text-\[11px\] {
+  font-size: 0.6875rem !important;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  background: var(--color-surface-0);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--color-surface-0);
+  color: var(--color-text);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-4);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-strong);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dice-pop {
+  0% {
+    transform: scale(0.85) rotate(-8deg);
+    opacity: 0.4;
+  }
+  60% {
+    transform: scale(1.08) rotate(4deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(var(--color-accent-rgb) / 0.25);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgb(var(--color-accent-rgb) / 0);
+  }
+}
+
+@keyframes shake-soft {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px);
+  }
+  75% {
+    transform: translateX(2px);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.35s var(--ease-out-soft) both;
+}
+
+.animate-dice-pop {
+  animation: dice-pop 0.45s var(--ease-out-soft) both;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 1.6s ease-out;
+}
+
+.animate-shake-soft {
+  animation: shake-soft 0.35s ease-in-out;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.interactive-lift {
+  transition:
+    transform 180ms var(--ease-out-soft),
+    border-color 180ms var(--ease-out-soft),
+    background-color 180ms var(--ease-out-soft),
+    box-shadow 180ms var(--ease-out-soft),
+    color 180ms var(--ease-out-soft);
+}
+
+.interactive-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-hover);
+}
+
+.interactive-lift:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.skill-row {
+  transition:
+    background-color 160ms var(--ease-out-soft),
+    padding-left 160ms var(--ease-out-soft);
+}
+
+.skill-row:hover {
+  background-color: rgb(var(--color-accent-rgb) / 0.08);
+}
+
+.stat-card {
+  transition:
+    transform 180ms var(--ease-out-soft),
+    border-color 180ms var(--ease-out-soft),
+    background-color 180ms var(--ease-out-soft),
+    box-shadow 180ms var(--ease-out-soft);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-border-strong);
+  background-color: var(--color-surface-3);
+  box-shadow: var(--shadow-panel);
+}
+
+.nav-link-item {
+  transition:
+    background-color 160ms var(--ease-out-soft),
+    color 160ms var(--ease-out-soft),
+    transform 160ms var(--ease-out-soft),
+    padding-left 160ms var(--ease-out-soft);
+}
+
+.nav-link-item:hover {
+  transform: translateX(2px);
+}
+
+.tip-callout {
+  border-left: 3px solid var(--color-accent-muted);
+  background: linear-gradient(
+    90deg,
+    rgb(var(--color-accent-rgb) / 0.1),
+    transparent 70%
+  );
+}
+
+.field-control:focus {
+  border-color: color-mix(in srgb, var(--color-accent) 60%, var(--color-border));
+  box-shadow: 0 0 0 3px rgb(var(--color-accent-rgb) / 0.14);
+}
+
+/*
+ * PNGs oficiais: traço branco, miolo preto.
+ * Escuro: screen (preto some, fica o contorno branco).
+ * Claro / impressão: inverte e multiply (fica o mesmo contorno, preto).
+ */
+.action-icon-img {
+  mix-blend-mode: screen;
+}
+
+html[data-theme='light'] .action-icon-img {
+  mix-blend-mode: multiply;
+  filter: invert(1);
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 8mm;
+  }
+
+  html {
+    font-size: 11px !important;
+    --app-ui-scale: 1 !important;
+  }
+
+  html,
+  body,
+  #root {
+    height: auto !important;
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  .print-hidden {
+    display: none !important;
+  }
+
+  .session-sheet,
+  .character-sheet-print,
+  .creature-session-sheet {
+    color: #111;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .action-icon-img {
+    mix-blend-mode: multiply;
+    filter: invert(1);
+  }
+}

@@ -1,0 +1,529 @@
+export { calculateProficiencyBonus, calculateMythicProficiencyBonus, proficiencyRankValue, maxProficiencyRank, nextProficiencyRank, canIncreaseSkillRank, skillIncreaseBlockReason } from './proficiency'
+export { calculateArmorClass } from './armorClass'
+export { calculateSkillModifier, getSkillAttribute } from './skills'
+export {
+  validateBackgroundChoices,
+  getAvailableAttributesForBoost,
+  resolveBackgroundBenefits,
+  describeBoostRule,
+  describeSkillGrant,
+  describeLoreGrant,
+  featGrantIsChoice,
+  buildBackgroundFeatPick,
+} from './background'
+export type { BackgroundValidationIssue, ResolvedBackgroundBenefits } from './background'
+export {
+  emptyAncestryChoices,
+  isAutoAttributeBoost,
+  getRequiredFreeBoostRules,
+  getEffectiveAncestryBoostChoices,
+  getAvailableAttributesForAncestryBoost,
+  additionalLanguageSlots,
+  validateAncestryChoices,
+  resolveResistanceValue,
+  resolveAncestryBenefits,
+  resolveAncestrySize,
+  formatAncestryDisplayName,
+  formatSpeedSummary,
+  additionalSpeedBreakdown,
+  describeAncestryBoostRule,
+} from './ancestry'
+export {
+  isVersatileHeritage,
+  isHeritageCompatibleWithAncestry,
+  partitionHeritagesForAncestry,
+  extraAncestryIdsFromHeritage,
+  extraHeritageIdsFromHeritage,
+  additionalLanguageOptionsFor,
+} from './heritage'
+export type {
+  AncestryValidationIssue,
+  ResolvedAncestryBenefits,
+} from './ancestry'
+export {
+  emptyClassChoices,
+  additionalClassSkillSlots,
+  validateClassChoices,
+  resolveClassBenefits,
+  buildSaveStat,
+  buildPerceptionStat,
+  getUnarmoredDefenseRank,
+  getDefenseRankForCategory,
+  getAttackRankForCategory,
+  getAttackRankForWeapon,
+  collectClassGrantedFeatPicks,
+  classFeaturePickValue,
+  mergeFeatChoicesIntoClassPicks,
+  describeClassSkillSlots,
+  getSelectedSubclass,
+  subclassCountsAs,
+  getSelectedSecondarySubclass,
+  getEffectiveKeyAttributes,
+  getReservedClassSkills,
+  sneakAttackDice,
+  classFeatureIsFeatStub,
+} from './class'
+export type { ClassValidationIssue, ResolvedClassBenefits, ClassFeaturePickView } from './class'
+export {
+  catalogSlotCount,
+  catalogPreparedSlotCount,
+  visibleCatalogOptions,
+  validateClassCatalogs,
+  pruneCatalogChoices,
+  selectedCatalogOptions,
+} from './classCatalog'
+export { calculateHitPoints } from './hitPoints'
+export { resolveAttributeModifiers, resolveCharacterSheet, resolveGrantedSkillRanks } from './character'
+export {
+  resolveConditionEffects,
+  applyConditionSlicesToDerived,
+  upsertCondition,
+  setConditionValue,
+  removeCondition,
+  drainedHpDelta,
+} from './conditions'
+export type { ResolveCharacterContext } from './character'
+export {
+  resolveClassSignature,
+  classSignatureIsEmpty,
+} from './classSignatures'
+export {
+  resolveCatalogKit,
+  applyCatalogWeaponExtras,
+  standardDcForLevel,
+  craftingCheckBonus,
+} from './catalogKit'
+export {
+  applyFeatEffects,
+  collectFeatsForEffects,
+  collectGrantedChildFeatIds,
+  earnedSelectedFeats,
+  extraAncestryIdsFromFeatChoices,
+  archetypeSpellSlotsForTier,
+} from './featEffects'
+export { enrichFeatDescription, spellcastingTierBlurb } from './featDisplay'
+export { parseFeatDescriptionEffects, effectsForFeat } from './parseFeatEffects'
+export {
+  parseWeaponFamiliarityFromText,
+  parseCircumstanceBonusesFromText,
+  alwaysOnCircumstanceStat,
+  sumAlwaysOnCircumstance,
+  formatFamiliaritySummary,
+  formatFamiliarityRules,
+} from './training'
+export {
+  getFeatSlots,
+  getFeatSlotsForBuilder,
+  getClassFeatLevels,
+  getSkillFeatLevels,
+  getGeneralFeatLevels,
+  getAncestryFeatLevels,
+  getFreeArchetypeFeatLevels,
+  extraFeatSlotsFromSelections,
+  evaluateFeatAvailability,
+  evaluateFeatPrerequisiteChecks,
+  sanitizeFeatSelections,
+  validateFeatSelections,
+  pruneFeatSelections,
+  selectionsToGrantedFeats,
+  findFeatInCatalog,
+  hydrateGrantedFeat,
+  catalogFeatIdsForGrants,
+  isPlaceholderFeatLookup,
+} from './feats'
+export type { FeatValidationIssue, FeatSlotOptions } from './feats'
+export {
+  listArchetypes,
+  getArchetype,
+  sortArchetypes,
+  sortArchetypeProgress,
+  isDedicationFeat,
+  isArchetypeFeat,
+  findArchetypeForFeat,
+  resolveArchetypeId,
+  featFitsSlot,
+  featMatchesCategoryFilter,
+  resolveArchetypeProgress,
+  unfinishedPriorDedications,
+  dedicationLockReason,
+  featIgnoresDedicationLockFor,
+  multiclassDedicationReason,
+} from './archetypes'
+export {
+  hasMythicTrait,
+  isMythicDestinyDedication,
+  isGeneralMythicFeat,
+  getMythicFeatLevels,
+  resolveMythicCalling,
+  isMythicCharacter,
+  mythicAbilitiesForCalling,
+  MYTHIC_POINTS_MAX,
+  MYTHIC_POINTS_START,
+} from './mythic'
+export {
+  getAttributeBoostLevels,
+  getSkillIncreaseLevels,
+  isAttributeBoostLevel,
+  getAutomaticFeaturesForLevel,
+  buildLevelProgression,
+  countPendingProgressionChoices,
+  validateAttributeBoostSet,
+  toggleAttributeInBoostSet,
+  applySkillIncreases,
+  getLevelBoostContributions,
+  pruneLevelAttributeBoosts,
+  incompleteAttributeBoostLevels,
+  incompleteSkillIncreaseLevels,
+  pruneSkillIncreases,
+  getSkillRankBeforeIncrease,
+  ATTRIBUTE_BOOST_LEVELS,
+  BOOSTS_PER_LEVEL,
+} from './progression'
+export {
+  pruneGradualAttributeBoosts,
+  incompleteGradualBoostLevels,
+  getGradualBoostLevels,
+  attributesAlreadyBoostedInGradualSet,
+  resolveAutomaticBonusProgression,
+  skillPotencyBonus,
+} from './variantRules'
+export type {
+  ProgressionChoiceStatus,
+  LevelProgressionView,
+} from './progression'
+export { evaluateFormula, buildFormulaVars } from './formula'
+export {
+  resolveConnectionValue,
+  resolveConnections,
+  sumConnectionBonus,
+  sumConnectionBonuses,
+  applyWeaponConnections,
+  mergeTypedDefenses,
+  collectConnectionImmunities,
+  shiftCreatureSize,
+  resolveCreatureSize,
+  summarizeActiveConnections,
+  CREATURE_SIZE_ORDER,
+} from './connections'
+export {
+  resolveDeityBenefits,
+  classUsesDeityMechanics,
+  classRequiresDeity,
+  divineFontSlotCount,
+  DIVINE_FONT_LABELS,
+  SANCTIFICATION_LABELS,
+  SANCTIFICATION_CHOICE_DESCRIPTIONS,
+  spellViewForRules,
+  spellRulesBlurb,
+  domainRulesBlurb,
+  fontChoiceDescription,
+} from './deity'
+export type { ResolvedDeityBenefits, SpellRulesView } from './deity'
+export { listDeities, getDeityById, catalogDeityCount } from './deityCatalog'
+export {
+  listCreatures,
+  getCreatureById,
+  catalogCreatureCount,
+  listCreatureFamilies,
+  listFamiliesForCreature,
+} from './bestiaryCatalog'
+export {
+  STAT_BAND_LABELS,
+  CREATURE_ROAD_MAPS,
+  applyRoadMapToCreature,
+  armorClass,
+  attributeModifier,
+  classifyArmorClass,
+  classifyAttribute,
+  classifyCheck,
+  classifyHitPoints,
+  classifySkill,
+  classifySpellDc,
+  classifyStrikeBonus,
+  typicalExtremeCount,
+  typicalSpellRank,
+} from './creatureBuilding'
+export type { CreatureRoadMapId, CreatureStatBand } from './creatureBuilding'
+export {
+  COMBAT_THREATS,
+  ENCOUNTER_SHAPES,
+  combatThreatLabel,
+  creatureEncounterXp,
+  encounterAsPlainText,
+  encounterCountRange,
+  encounterLevelForVariant,
+  encounterLinesXp,
+  encounterShapeLabel,
+  encounterXpBudget,
+  generateEncounterLines,
+  creatureMatchesTraitFilter,
+  lineFromCreature,
+  preferredDeltaRange,
+  refreshEncounterLines,
+  rerollEncounterLine,
+  resolveEncounterShape,
+  themeKeysForCreature,
+} from './encounterGenerator'
+export {
+  applyCreatureVariant,
+  parseCreatureVariant,
+  creatureVariantQuery,
+  creatureVariantLabel,
+  dcByLevel,
+  adjustDamageText,
+} from './creatureVariant'
+export { resolveCreatureSpell } from './creatureSpells'
+export type { ResolvedCreatureSpell } from './creatureSpells'
+export {
+  resolveSpellcastingAccess,
+  filterSpellsForAccess,
+  filterSpellsForSource,
+  knownTraditionsFromAccess,
+  spellMatchesKnownTraditions,
+  spellAllowedForAccess,
+  maxLearnableSpellRank,
+  learnableSpellRanks,
+  spellRankIsLearnable,
+  pruneSpellStateForAccess,
+  primarySpellSourceId,
+  spellSourcesWithCollection,
+  accessForSource,
+  spellSourceStatLabel,
+  sourceAttackBreakdown,
+  suggestedSpellcastingSource,
+  resolveItemSpellcastingSource,
+  resolveItemSpellcastingSourceForSpells,
+  spellSourceCastLabel,
+  sourceMatchesSpellTradition,
+  suggestedSpellcastingSourceForSpells,
+  nextSpellcastingSourceIdOnSpellChange,
+  getSourceSpellState,
+  viewStateForSource,
+  commitSourceSpellState,
+  traditionLabel,
+  spellcastingStyleLabel,
+  resolveCastMode,
+  usesPreparedSlots,
+  usesSpellbookCollection,
+  preparesFromTraditionList,
+  spellCollectionLabel,
+  autoHeightenRank,
+  emptySpellState,
+  syncPreparedSlots,
+  applyDailyPreparations,
+  resolveFocusMax,
+  learnSpell,
+  unlearnSpell,
+  learnRitual,
+  unlearnRitual,
+  prepareIntoSlot,
+  setSlotExpended,
+  spendSpontaneousSlot,
+  restoreSpontaneousSlot,
+  spendFocusPoint,
+  refocus,
+  spendBondedItem,
+  toggleCantripPrepared,
+} from './spellcasting'
+export {
+  listSpells,
+  getSpellById,
+  listSpellsByRank,
+  catalogSpellCount,
+} from './spellCatalog'
+export {
+  listRituals,
+  getRitualById,
+  listRitualsByRank,
+  catalogRitualCount,
+} from './ritualCatalog'
+export {
+  signatureFeatureActive,
+  signatureRanks,
+  signatureSet,
+  extraSignatureBudget,
+  canHeightenFreely,
+  spontaneousOptionsForRank,
+  pendingSignaturePicks,
+  toggleSignatureSpell,
+} from './signatureSpells'
+export type { SignaturePending } from './signatureSpells'
+export {
+  collectGrantedClassSpells,
+  pruneGrantedSpellPicks,
+  resolveGrantedSpellIds,
+  mergedKnownSpellIds,
+  findSpellByOriginalName,
+  listActiveSpellPicks,
+  characterLevelForSpellRank,
+  normalizeSpellName,
+} from './grantedSpells'
+export type {
+  ResolvedGrantedClassSpells,
+  GrantedSpellIds,
+} from './grantedSpells'
+export {
+  emptyCompanions,
+  createEmptyAnimalCompanion,
+  createEmptyFamiliar,
+  createEmptyPet,
+  createEmptyConstructCompanion,
+  createEmptyEidolon,
+  listFamiliarAbilityDefinitions,
+  listAnimalCompanionTypes,
+  getAnimalCompanionType,
+  listEidolonTypes,
+  getEidolonType,
+  listFamiliarForms,
+  getFamiliarForm,
+  listSpecificFamiliars,
+  getSpecificFamiliar,
+  listConstructModifications,
+  getConstructModification,
+  getFamiliarAbilitySlots,
+  applyFamiliarForm,
+  applySpecificFamiliar,
+  innateAbilityIdsForForm,
+  estimateFamiliarMaxHp,
+  estimateFamiliarSkillModifier,
+  nextAnimalCompanionStages,
+  nextConstructCompanionStages,
+  validateFamiliarSelections,
+  validateCompanions,
+  resolveCompanions,
+  resolveConstructCompanionStats,
+  canAddFamiliarOrPet,
+  canAddAnimalCompanion,
+  canAddConstructCompanion,
+  canAddEidolon,
+} from './companions'
+export type {
+  CompanionValidationIssue,
+  ResolvedFamiliarAbility,
+  ResolvedFamiliarOrPet,
+  ResolvedAnimalCompanion,
+  ResolvedConstructCompanion,
+  ResolvedEidolon,
+  ResolvedCompanions,
+  ResolvedAnimalCompanionStats,
+  ResolvedConstructCompanionStats,
+  ResolvedEidolonStats,
+} from './companions'
+export { resolveAnimalCompanionStats } from './animalCompanion'
+export {
+  resolveEquipment,
+  parseBulkString,
+  formatBulk,
+  formatPriceCp,
+  formatRuneSummary,
+  etchedRuneDefinitions,
+  bulkToNumeric,
+  createInventoryItemFromDefinition,
+  armorCheckPenaltyApplies,
+  catalogItemCount,
+  listItemDefinitions,
+  getItemDefinition,
+  slotFromCategory,
+  resolveRunes,
+  etchRune,
+  removeRune,
+  canEtchRune,
+  listCompatibleRunes,
+  itemRuneHostKind,
+  weaponShotKind,
+  listCompatibleAmmo,
+  pickLoadedAmmo,
+  spendWeaponShot,
+  etchedDisplayName,
+  applyWeaponSpecialization,
+  weaponSpecializationDamage,
+  improvedFistDamageDie,
+  FIST_ITEM_DEFINITION_ID,
+  INNATE_UNARMED_ITEM_ID,
+} from './equipment'
+export {
+  MAP_STEP_LABELS,
+  hasAgileTrait,
+  traitsForMap,
+  resolveMapProfile,
+  mapPenaltyForStep,
+  mapAttackBonus,
+  mapPenaltyBreakdownLabel,
+  mapFlagsFromSheet,
+} from './multipleAttackPenalty'
+export type { MapProfile, MapFlags } from './multipleAttackPenalty'
+export {
+  isCombinationWeapon,
+  combinationPartnerDefinitionId,
+  getCombinationPartnerDefinition,
+  combinationBaseName,
+  combinationModeLabel,
+  combinationModeTitle,
+  combinationDisplayName,
+  resolvedWeaponAttackKey,
+} from './combinationWeapons'
+export {
+  refreshDailyMagicItems,
+  prepareStaff,
+  spendStaffCharge,
+  spendWandCharge,
+  breakWand,
+  consumeItem,
+  replaceInventoryItem,
+  wandOverchargeDc,
+  staffChargeCostLabel,
+  prepareGrimoire,
+} from './magicItems'
+export {
+  listSpellheartSpellEntries,
+  listSpellheartSpells,
+  findSpellByDisplayLabel,
+  resolveSpellheartCastStats,
+} from './spellheartSpells'
+export {
+  resolveActiveItemEffects,
+  activateAlchemicalEffect,
+  dismissActiveEffect,
+  dismissActiveItemEffect,
+  applyAttackAdjustments,
+  mutagenUnarmedAttacks,
+  applyInjuryPoison,
+  spendWeaponPoison,
+  applyOilOfPotency,
+  applySilverSalve,
+  canApplyInjuryPoison,
+  canApplyOil,
+  canApplySilverSalve,
+  canAffixTalisman,
+  affixTalisman,
+  unfixTalisman,
+  activateAffixedTalisman,
+  affixSpellheart,
+  unfixSpellheart,
+} from './activeItems'
+export type { ResolvedActiveItems } from './activeItems'
+export {
+  applyStartingWealth,
+  formatCoinsCp,
+  STARTING_WEALTH_CP,
+  getClassKit,
+  materializeClassKitItems,
+  materializeAdventuringKitItems,
+  leftoverPurchaseSuggestions,
+} from './startingWealth'
+export type {
+  StartingWealthResult,
+  ClassKitDefinition,
+  KitMaterializeResult,
+} from './startingWealth'
+export {
+  buildCreationChecklist,
+  firstIncompleteSection,
+} from './creationWizard'
+export type {
+  CreationChecklist,
+  CreationStep,
+  CreationSectionId,
+} from './creationWizard'
+export { initialSpellGaps } from './creationSpells'
+export { companionCreationGaps, requiredCompanionKinds } from './creationCompanions'
