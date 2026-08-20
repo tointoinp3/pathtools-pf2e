@@ -49,17 +49,20 @@ export function TokenTileContent({
   const back = oppositeFacing(token.facing)
   const compact = cellSize * Math.min(token.w, token.h) < 40
 
-  const baseStyle = active
-    ? 'border-accent bg-surface-3'
-    : isLoot
-      ? 'border-accent/70 bg-accent/15'
-      : kind === 'character'
-        ? 'border-info/70 bg-info/10'
-        : 'border-border-strong bg-surface-3'
+  const framed = Boolean(url)
+  const baseStyle = framed
+    ? 'border-0 bg-transparent'
+    : active
+      ? 'border border-accent bg-surface-3'
+      : isLoot
+        ? 'border border-accent/70 bg-accent/15'
+        : kind === 'character'
+          ? 'border border-info/70 bg-info/10'
+          : 'border border-border-strong bg-surface-3'
 
   return (
     <div
-      className={`relative h-full w-full select-none overflow-hidden rounded-md border ${baseStyle} ${
+      className={`relative h-full w-full select-none overflow-hidden rounded-md ${baseStyle} ${
         token.defeated ? 'opacity-55 grayscale' : ''
       }`}
     >
@@ -68,7 +71,7 @@ export function TokenTileContent({
           src={url}
           alt={token.name}
           draggable={false}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-contain"
         />
       ) : null}
 

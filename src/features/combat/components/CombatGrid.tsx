@@ -17,9 +17,27 @@ import {
   CELL_SIZE_MIN,
 } from '@/features/combat/combatRepository'
 import { useCombatStore } from '@/stores/combatStore'
+import { useCombatMapImage } from '@/features/combat/useCombatMapImage'
+import { CombatMapLayer } from './CombatMapLayer'
 import { TokenTileContent } from './TokenTileContent'
 
 export type BoardTool = 'select' | 'brush' | 'eraser' | 'picker'
+
+function GridLineOverlay({ cell, opacity }: { cell: number; opacity: number }) {
+  if (opacity <= 0.005) return null
+  const pct = Math.round(opacity * 100)
+  const line = `color-mix(in srgb, var(--color-border) ${pct}%, transparent)`
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-0 z-[1]"
+      style={{
+        backgroundImage: `linear-gradient(to right, ${line} 1px, transparent 1px), linear-gradient(to bottom, ${line} 1px, transparent 1px)`,
+        backgroundSize: `${cell}px ${cell}px`,
+      }}
+    />
+  )
+}
 
 interface DragState {
   kind: 'move' | 'resize'
@@ -35,16 +53,19 @@ export function CombatGrid({
   brushColor,
   brushOpacity,
   onPickColor,
+  adjustingMap,
 }: {
   tool: BoardTool
   brushColor: string
   brushOpacity: number
   /** Conta-gotas: devolve a cor e a opacidade da célula clicada. */
   onPickColor: (hex: string, alpha: number) => void
+  adjustingMap: boolean
 }) {
   const session = useCombatStore((s) => s.current)
   const selectedTokenId = useCombatStore((s) => s.selectedTokenId)
   const selectToken = useCombatStore((s) => s.selectToken)
+  const mapUrl = useCombatMapImage(session?.id ?? null)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const boardRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<DragState | null>(null)
@@ -77,6 +98,9 @@ export function CombatGrid({
   if (!session) return null
   const cell = session.cellSize
   const painting = tool !== 'select'
+  const map = session.mapBackdrop
+  const gridOpacity = session.gridLineOpacity ?? 1
+  const tokensLocked = painting || adjustingMap
 
   function startMove(event: ReactPointerEvent, token: CombatToken) {
     if (event.button !== 0) return
@@ -139,6 +163,7 @@ export function CombatGrid({
   }
 
   function handleBoardPointerDown(event: ReactPointerEvent) {
+    if (adjustingMap) return
     if (tool === 'picker') {
       if (event.button !== 0) return
       const board = boardRef.current
@@ -243,21 +268,30 @@ export function CombatGrid({
     <div ref={wrapperRef} className="h-full overflow-auto p-4">
       <div
         ref={boardRef}
-        className={`relative rounded-lg border border-border-strong bg-surface-1 shadow-[0_4px_20px_rgba(0,0,0,0.14)] ${
+        className={`relative overflow-hidden rounded-lg border border-border-strong bg-surface-1 shadow-[0_4px_20px_rgba(0,0,0,0.14)] ${
           painting ? 'cursor-crosshair touch-none' : ''
         }`}
         style={{
           width: session.gridCols * cell + 1,
           height: session.gridRows * cell + 1,
-          backgroundImage:
-            'linear-gradient(to right, var(--color-border) 1px, transparent 1px), linear-gradient(to bottom, var(--color-border) 1px, transparent 1px)',
-          backgroundSize: `${cell}px ${cell}px`,
         }}
         onPointerDown={handleBoardPointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={endInteraction}
         onPointerCancel={endInteraction}
       >
+        {map && (mapUrl || adjustingMap) ? (
+          <CombatMapLayer
+            boardRef={boardRef}
+            cell={cell}
+            map={map}
+            url={mapUrl}
+            adjusting={adjustingMap}
+          />
+        ) : null}
+
+        <GridLineOverlay cell={cell} opacity={gridOpacity} />
+
         {/* Células pintadas com o pincel (terreno, áreas de magia…) */}
         {Object.entries(session.paint ?? {}).map(([key, color]) => {
           const pos = parsePaintKey(key)
@@ -274,7 +308,7 @@ export function CombatGrid({
             <div
               key={key}
               aria-hidden
-              className="pointer-events-none absolute"
+              className="pointer-events-none absolute z-[2]"
               style={{
                 left: pos.x * cell,
                 top: pos.y * cell,
@@ -286,12 +320,13 @@ export function CombatGrid({
           )
         })}
 
-        {session.tokens.length === 0 ? (
+        {session.tokens.length === 0 && !map ? (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6">
             <p className="max-w-sm text-center text-sm text-text-dim">
               Tabuleiro vazio. Use “+ Bestiário” para buscar fichas, “+
-              Jogadores” para trazer a mesa, “+ Baú” para tesouro no mapa ou
-              “Importar encontro” para um combate salvo inteiro.
+              Jogadores” para trazer a mesa, “+ Baú” para tesouro, “Cenário…”
+              para um mapa de fundo ou “Importar encontro” para um combate
+              salvo inteiro.
             </p>
           </div>
         ) : null}
@@ -324,10 +359,10 @@ export function CombatGrid({
                   : `${token.name} — PV ${token.currentHp}/${token.maxHp}${acLabel}${conditionsLabel}`
               }
               className={`absolute touch-none rounded-md ${
-                painting
+                tokensLocked
                   ? 'pointer-events-none'
                   : 'cursor-grab active:cursor-grabbing'
-              } ${
+              } ${adjustingMap ? 'opacity-40' : ''} ${
                 selected
                   ? 'ring-2 ring-info'
                   : active
@@ -344,7 +379,7 @@ export function CombatGrid({
               onPointerDown={(event) => startMove(event, token)}
             >
               <TokenTileContent token={token} cellSize={cell} active={active} />
-              {selected && !painting ? (
+              {selected && !tokensLocked ? (
                 <div
                   aria-label="Redimensionar"
                   title="Arraste para mudar o tamanho (células)"

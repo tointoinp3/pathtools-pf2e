@@ -6,7 +6,6 @@ import { useCombatStore } from '@/stores/combatStore'
 import {
   deleteTokenImage,
   saveTokenImage,
-  type TokenImageScope,
 } from '@/features/combat/combatImageRepository'
 import { useTokenImage } from '@/features/combat/useTokenImage'
 
@@ -14,10 +13,10 @@ export function TokenImageControl({ token }: { token: CombatToken }) {
   const bumpImageVersion = useCombatStore((s) => s.bumpImageVersion)
   const { url, scope } = useTokenImage(token.id, token.creatureId)
   const inputRef = useRef<HTMLInputElement>(null)
-  const pendingScopeRef = useRef<TokenImageScope>('token')
+  const pendingScopeRef = useRef<'token' | 'creature'>('token')
   const creature = getCreatureById(token.creatureId)
 
-  function pick(scope: TokenImageScope) {
+  function pick(scope: 'token' | 'creature') {
     pendingScopeRef.current = scope
     inputRef.current?.click()
   }

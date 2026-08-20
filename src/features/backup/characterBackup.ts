@@ -15,6 +15,8 @@ import {
   isCharacterFileFormat,
   isCharactersFileFormat,
   isHomebrewFileFormat,
+  isCombatFileFormat,
+  isCombatsFileFormat,
   invalidBackupJsonMessage,
 } from '@/features/backup/formats'
 
@@ -219,6 +221,12 @@ function parseEntries(data: unknown): CharacterBackupEntry[] {
   if (isHomebrewFileFormat(format)) {
     throw new Error(
       'Este arquivo é de conteúdo homebrew. Importe-o na página Homebrew.',
+    )
+  }
+
+  if (isCombatFileFormat(format) || isCombatsFileFormat(format)) {
+    throw new Error(
+      'Este arquivo é de combate. Importe-o em Meus Combates.',
     )
   }
 

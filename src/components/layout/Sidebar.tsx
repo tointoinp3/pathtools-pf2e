@@ -114,6 +114,11 @@ function primarySection(mode: WorkspaceMode): NavSection {
           label: 'Meus Combates',
           hint: 'Combates salvos neste dispositivo',
         },
+        {
+          to: '/combate/token',
+          label: 'Criar token',
+          hint: 'Moldura + foto para o grid ou PNG',
+        },
       ],
     }
   }
@@ -354,7 +359,7 @@ export function Sidebar() {
           </div>
           <ThemePicker compact />
         </div>
-        Fundação v0.2
+        Fundação v0.2.1
         <br />
         {modeFooter(mode)}
       </div>

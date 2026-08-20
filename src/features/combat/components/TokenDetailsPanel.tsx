@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import type { CombatToken, LootTokenItem } from '@/types'
-import type { LootHaul } from '@/types/loot'
+import type { CombatToken } from '@/types'
 import { Button } from '@/components/ui/Button'
 import { Input, Label } from '@/components/ui/Field'
 import {
@@ -22,10 +21,9 @@ import {
 import { CONDITION_DEFINITIONS } from '@/data/seeds/conditions'
 import { CreatureStatBlock } from '@/features/bestiary/components/CreatureStatBlock'
 import { syncCharacterTokenPatch } from '@/features/combat/characterImport'
-import { listHauls } from '@/features/loot/lootRepository'
 import { useCombatStore } from '@/stores/combatStore'
-import { createId } from '@/utils/id'
 import { CharacterMiniStatBlock } from './CharacterMiniStatBlock'
+import { CombatChestItems } from './CombatChestItems'
 import { TokenImageControl } from './TokenImageControl'
 
 /** Condições comuns na mesa, para aplicar com um clique. */
@@ -97,10 +95,6 @@ function SectionTitle({ children }: { children: string }) {
   )
 }
 
-function formatGold(cp: number): string {
-  return `${(cp / 100).toLocaleString('pt-BR', { maximumFractionDigits: 2 })} po`
-}
-
 export function TokenDetailsPanel() {
   const session = useCombatStore((s) => s.current)
   const selectedTokenId = useCombatStore((s) => s.selectedTokenId)
@@ -115,10 +109,6 @@ export function TokenDetailsPanel() {
 
   const [amountText, setAmountText] = useState('')
   const [conditionText, setConditionText] = useState('')
-  const [itemName, setItemName] = useState('')
-  const [itemQty, setItemQty] = useState('1')
-  const [hauls, setHauls] = useState<LootHaul[] | null>(null)
-  const [showHauls, setShowHauls] = useState(false)
   const [syncing, setSyncing] = useState(false)
 
   const token = session?.tokens.find((t) => t.id === selectedTokenId) ?? null
@@ -133,9 +123,6 @@ export function TokenDetailsPanel() {
   useEffect(() => {
     setAmountText('')
     setConditionText('')
-    setItemName('')
-    setItemQty('1')
-    setShowHauls(false)
   }, [selectedTokenId])
 
   if (!session || !token) {
@@ -202,50 +189,6 @@ export function TokenDetailsPanel() {
 
   const lootItems = token.lootItems ?? []
 
-  function addLootItem() {
-    const name = itemName.trim()
-    if (!token || !name) return
-    const quantity = Math.max(1, Math.round(Number(itemQty)) || 1)
-    patchToken({
-      lootItems: [
-        ...lootItems,
-        { id: createId('loot-item'), name, quantity, taken: false },
-      ],
-    })
-    setItemName('')
-    setItemQty('1')
-  }
-
-  function patchLootItem(id: string, patch: Partial<LootTokenItem>) {
-    patchToken({
-      lootItems: lootItems.map((item) =>
-        item.id === id ? { ...item, ...patch } : item,
-      ),
-    })
-  }
-
-  async function toggleHauls() {
-    if (!showHauls && hauls === null) {
-      setHauls(await listHauls())
-    }
-    setShowHauls((v) => !v)
-  }
-
-  function importHaul(haul: LootHaul) {
-    if (!token) return
-    const imported: LootTokenItem[] = haul.lines.map((line) => ({
-      id: createId('loot-item'),
-      name:
-        line.kind === 'coins' && line.coinsCp != null
-          ? `${line.name} (${formatGold(line.coinsCp)})`
-          : line.name,
-      quantity: Math.max(1, line.quantity),
-      taken: false,
-    }))
-    patchToken({ lootItems: [...lootItems, ...imported] })
-    setShowHauls(false)
-  }
-
   const variantQuery = creatureVariantQuery(token.variant)
   const sheetHref =
     kind === 'creature' && token.creatureId
@@ -276,7 +219,9 @@ export function TokenDetailsPanel() {
       className={`flex shrink-0 flex-col overflow-y-auto border-l border-border bg-surface-1 p-3 ${
         (kind === 'creature' && creature) || kind === 'character'
           ? 'w-[30rem]'
-          : 'w-72'
+          : kind === 'loot'
+            ? 'w-[22rem]'
+            : 'w-72'
       }`}
     >
       {/* Nome */}
@@ -308,133 +253,8 @@ export function TokenDetailsPanel() {
         </div>
       </div>
 
-      {/* Itens do baú */}
       {kind === 'loot' ? (
-        <div className="mt-3 border-t border-border/60 pt-3">
-          <SectionTitle>Itens</SectionTitle>
-          {lootItems.length > 0 ? (
-            <ul className="mb-2 space-y-1">
-              {lootItems.map((item) => (
-                <li
-                  key={item.id}
-                  className="flex items-center gap-1.5 rounded-md border border-border bg-surface-2 px-1.5 py-1"
-                >
-                  <input
-                    type="checkbox"
-                    aria-label={`${item.name} pego`}
-                    title="Marcar como pego"
-                    checked={item.taken}
-                    onChange={(event) =>
-                      patchLootItem(item.id, { taken: event.target.checked })
-                    }
-                  />
-                  <span
-                    className={`min-w-0 flex-1 truncate text-xs ${
-                      item.taken ? 'text-text-dim line-through' : 'text-text'
-                    }`}
-                    title={item.name}
-                  >
-                    {item.name}
-                  </span>
-                  <input
-                    type="number"
-                    aria-label={`Quantidade de ${item.name}`}
-                    className="field-control w-11 shrink-0 rounded-md border border-border bg-surface-1 px-1 py-0.5 text-center text-xs text-text outline-none"
-                    value={item.quantity}
-                    min={1}
-                    onChange={(event) =>
-                      patchLootItem(item.id, {
-                        quantity: Math.max(
-                          1,
-                          Math.round(Number(event.target.value)) || 1,
-                        ),
-                      })
-                    }
-                  />
-                  <button
-                    type="button"
-                    aria-label={`Remover ${item.name}`}
-                    className="shrink-0 text-text-dim hover:text-danger"
-                    onClick={() =>
-                      patchToken({
-                        lootItems: lootItems.filter((i) => i.id !== item.id),
-                      })
-                    }
-                  >
-                    ✕
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mb-2 text-[11px] text-text-dim">
-              Baú vazio. Adicione itens abaixo ou importe um saque pronto.
-            </p>
-          )}
-
-          <div className="flex gap-1.5">
-            <Input
-              aria-label="Nome do item"
-              placeholder="Ex.: Poção de cura"
-              value={itemName}
-              onChange={(event) => setItemName(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') addLootItem()
-              }}
-            />
-            <Input
-              type="number"
-              aria-label="Quantidade"
-              className="w-14 text-center"
-              value={itemQty}
-              min={1}
-              onChange={(event) => setItemQty(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') addLootItem()
-              }}
-            />
-            <Button size="sm" onClick={addLootItem}>
-              +
-            </Button>
-          </div>
-
-          <Button
-            size="sm"
-            variant="ghost"
-            className="mt-1.5 w-full"
-            onClick={() => void toggleHauls()}
-          >
-            {showHauls ? 'Fechar saques' : 'Importar de um saque…'}
-          </Button>
-          {showHauls ? (
-            hauls && hauls.length > 0 ? (
-              <ul className="mt-1.5 max-h-44 space-y-1 overflow-y-auto">
-                {hauls.map((haul) => (
-                  <li key={haul.id}>
-                    <button
-                      type="button"
-                      className="w-full rounded-md border border-border bg-surface-2 px-2 py-1.5 text-left hover:border-info/60"
-                      onClick={() => importHaul(haul)}
-                    >
-                      <span className="block truncate text-xs font-medium text-text">
-                        {haul.name}
-                      </span>
-                      <span className="text-[10px] text-text-dim">
-                        {haul.lines.length}{' '}
-                        {haul.lines.length === 1 ? 'linha' : 'linhas'} · nível{' '}
-                        {haul.partyLevel}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="mt-1.5 text-[11px] text-text-dim">
-                Nenhum saque salvo. Crie um no Gerador de Saque.
-              </p>
-            )
-          ) : null}
-        </div>
+        <CombatChestItems token={token} patchToken={patchToken} />
       ) : null}
 
       {/* PV */}

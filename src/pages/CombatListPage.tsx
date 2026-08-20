@@ -4,6 +4,12 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Field'
 import { Tip } from '@/components/ui/Panel'
 import { FilterCount } from '@/components/ui/FilterCount'
+import { BatchSelectBar } from '@/features/backup/BatchSelectBar'
+import { CombatJsonButtons } from '@/features/backup/JsonExchangeButtons'
+import {
+  runCombatExportMany,
+  runCombatExportOne,
+} from '@/features/backup/combatBackup'
 import { useCombatStore } from '@/stores/combatStore'
 
 function normalize(value: string): string {
@@ -18,6 +24,8 @@ export function CombatListPage() {
   const { sessions, loading, loadAll, createNew, remove, duplicate } =
     useCombatStore()
   const [query, setQuery] = useState('')
+  const [selected, setSelected] = useState<Set<string>>(() => new Set())
+  const [exportBusy, setExportBusy] = useState(false)
 
   useEffect(() => {
     void loadAll()
@@ -40,6 +48,37 @@ export function CombatListPage() {
     })
   }, [sessions, query])
 
+  useEffect(() => {
+    const ids = new Set(sessions.map((session) => session.id))
+    setSelected((prev) => {
+      const next = new Set([...prev].filter((id) => ids.has(id)))
+      return next.size === prev.size ? prev : next
+    })
+  }, [sessions])
+
+  function toggleSelected(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  async function exportSelected() {
+    const chosen = visible.filter((session) => selected.has(session.id))
+    setExportBusy(true)
+    try {
+      await runCombatExportMany(chosen)
+    } catch (error) {
+      window.alert(
+        error instanceof Error ? error.message : 'Falha ao exportar o lote.',
+      )
+    } finally {
+      setExportBusy(false)
+    }
+  }
+
   return (
     <div className="mx-auto max-w-6xl animate-fade-up p-5">
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
@@ -52,17 +91,37 @@ export function CombatListPage() {
             navegador.
           </p>
         </div>
-        <Button variant="accent" onClick={() => void handleCreate()}>
-          + Novo Combate
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <CombatJsonButtons />
+          <Button variant="accent" onClick={() => void handleCreate()}>
+            + Novo Combate
+          </Button>
+        </div>
       </div>
 
       <Tip>
-        Importe um encontro salvo ou busque fichas direto do bestiário: cada
-        criatura vira um quadrado no grid, com PV, ações, iniciativa,
-        frente/costas e imagem próprios. Ctrl+C/Ctrl+V duplica fichas e
-        Ctrl+Z desfaz qualquer coisa.
+        Importe um encontro salvo ou busque fichas direto do bestiário. Marque
+        vários combates para exportar um JSON só, ou importe vários arquivos de
+        uma vez. Em Criar token você monta o círculo de VTT e cola no
+        bestiário.
       </Tip>
+
+      {sessions.length > 0 ? (
+        <div className="mt-4">
+          <BatchSelectBar
+            selectedCount={visible.filter((session) => selected.has(session.id)).length}
+            totalCount={visible.length}
+            nounOne="combate"
+            nounMany="combates"
+            onSelectAll={() =>
+              setSelected(new Set(visible.map((session) => session.id)))
+            }
+            onClear={() => setSelected(new Set())}
+            onExport={() => void exportSelected()}
+            exportBusy={exportBusy}
+          />
+        </div>
+      ) : null}
 
       {sessions.length > 1 && (
         <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -114,8 +173,23 @@ export function CombatListPage() {
               return (
                 <li
                   key={session.id}
-                  className="interactive-lift group rounded-xl border border-border bg-surface-1/90 p-4 hover:border-accent/40"
+                  className={`interactive-lift group rounded-xl border bg-surface-1/90 p-4 hover:border-accent/40 ${
+                    selected.has(session.id)
+                      ? 'border-accent/60'
+                      : 'border-border'
+                  }`}
                 >
+                  <div className="flex items-start gap-2">
+                    <label className="mt-0.5 shrink-0">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 accent-[var(--color-accent)]"
+                        checked={selected.has(session.id)}
+                        onChange={() => toggleSelected(session.id)}
+                        aria-label={`Selecionar ${session.name}`}
+                      />
+                    </label>
+                    <div className="min-w-0 flex-1">
                   <Link
                     to={`/combate/${session.id}`}
                     className="block truncate font-display text-base font-semibold text-text transition-colors group-hover:text-accent"
@@ -166,6 +240,20 @@ export function CombatListPage() {
                     </Button>
                     <Button
                       size="sm"
+                      onClick={() => {
+                        void runCombatExportOne(session).catch((error) =>
+                          window.alert(
+                            error instanceof Error
+                              ? error.message
+                              : 'Falha ao exportar o combate.',
+                          ),
+                        )
+                      }}
+                    >
+                      Exportar JSON
+                    </Button>
+                    <Button
+                      size="sm"
                       variant="danger"
                       onClick={() => {
                         if (
@@ -179,6 +267,8 @@ export function CombatListPage() {
                     >
                       Excluir
                     </Button>
+                  </div>
+                    </div>
                   </div>
                 </li>
               )

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Creature, CreaturePowerVariant } from '@/types'
 import { Button } from '@/components/ui/Button'
 import { Input, Select } from '@/components/ui/Field'
+import { FilterCount } from '@/components/ui/FilterCount'
 import { listCreatures } from '@/engine/bestiaryCatalog'
 import { customToken, findFreeSpot, nextTokenName } from '@/engine/combat'
 import { SIZE_LABELS } from '@/utils/labels'
@@ -15,7 +16,92 @@ function normalize(value: string): string {
     .toLowerCase()
 }
 
-const RESULT_LIMIT = 60
+function creatureHaystack(creature: Creature): string {
+  return normalize(
+    [
+      creature.name,
+      creature.originalName,
+      ...creature.traits,
+      `nv ${creature.level}`,
+      `nivel ${creature.level}`,
+      SIZE_LABELS[creature.size],
+    ].join(' '),
+  )
+}
+
+const ROW_H = 52
+
+function CreaturePickList({
+  creatures,
+  onAdd,
+}: {
+  creatures: Creature[]
+  onAdd: (creature: Creature) => void
+}) {
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  const [scrollTop, setScrollTop] = useState(0)
+  const [viewH, setViewH] = useState(360)
+
+  useEffect(() => {
+    const el = scrollerRef.current
+    if (!el) return
+    const sync = () => setViewH(el.clientHeight)
+    sync()
+    const observer = new ResizeObserver(sync)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    scrollerRef.current?.scrollTo({ top: 0 })
+    setScrollTop(0)
+  }, [creatures])
+
+  const overscan = 12
+  const start = Math.max(0, Math.floor(scrollTop / ROW_H) - overscan)
+  const visible = Math.ceil(viewH / ROW_H) + overscan * 2
+  const end = Math.min(creatures.length, start + visible)
+  const slice = creatures.slice(start, end)
+
+  return (
+    <div
+      ref={scrollerRef}
+      className="min-h-0 flex-1 overflow-y-auto"
+      onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
+    >
+      <ul
+        className="relative px-2 py-1"
+        style={{ height: Math.max(ROW_H, creatures.length * ROW_H) }}
+      >
+        {slice.map((creature, index) => (
+          <li
+            key={creature.id}
+            className="absolute right-2 left-2"
+            style={{ top: (start + index) * ROW_H, height: ROW_H }}
+          >
+            <button
+              type="button"
+              className="flex h-full w-full items-center gap-2 rounded-lg px-2.5 text-left hover:bg-surface-2"
+              onClick={() => onAdd(creature)}
+            >
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-medium text-text">
+                  {creature.name}
+                </span>
+                <span className="block truncate text-[11px] text-text-dim">
+                  {creature.originalName} · {SIZE_LABELS[creature.size]}
+                </span>
+              </span>
+              <span className="shrink-0 rounded border border-border px-1.5 py-0.5 text-[10px] text-text-muted">
+                Nv {creature.level}
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
 
 export function AddCreatureDialog({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState('')
@@ -25,18 +111,24 @@ export function AddCreatureDialog({ onClose }: { onClose: () => void }) {
   const [feedback, setFeedback] = useState<string | null>(null)
   const searchRef = useRef<HTMLInputElement>(null)
 
-  const creatures = useMemo(() => listCreatures(), [])
+  const catalog = useMemo(
+    () =>
+      listCreatures().map((creature) => ({
+        creature,
+        hay: creatureHaystack(creature),
+      })),
+    [],
+  )
+
   const filtered = useMemo(() => {
-    const q = normalize(query.trim())
-    if (!q) return creatures.slice(0, RESULT_LIMIT)
-    return creatures
-      .filter((creature) =>
-        normalize(
-          `${creature.name} ${creature.originalName} ${creature.traits.join(' ')}`,
-        ).includes(q),
-      )
-      .slice(0, RESULT_LIMIT)
-  }, [creatures, query])
+    const words = normalize(query.trim())
+      .split(/\s+/)
+      .filter(Boolean)
+    if (words.length === 0) return catalog.map((row) => row.creature)
+    return catalog
+      .filter((row) => words.every((word) => row.hay.includes(word)))
+      .map((row) => row.creature)
+  }, [catalog, query])
 
   useEffect(() => {
     searchRef.current?.focus()
@@ -93,7 +185,7 @@ export function AddCreatureDialog({ onClose }: { onClose: () => void }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="add-creature-title"
-        className="flex max-h-[min(38rem,90vh)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border bg-surface-1 shadow-[0_12px_40px_rgba(0,0,0,0.45)]"
+        className="flex max-h-[min(44rem,92vh)] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-border bg-surface-1 shadow-[0_12px_40px_rgba(0,0,0,0.45)]"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="border-b border-border/70 px-4 py-3">
@@ -103,19 +195,32 @@ export function AddCreatureDialog({ onClose }: { onClose: () => void }) {
           >
             Adicionar fichas do bestiário
           </h2>
+          <label
+            htmlFor="combat-bestiary-search"
+            className="mt-3 mb-1 block text-xs font-medium tracking-wide text-text-muted uppercase"
+          >
+            Pesquisar criatura
+          </label>
+          <Input
+            id="combat-bestiary-search"
+            ref={searchRef}
+            type="search"
+            autoComplete="off"
+            className="min-w-0"
+            placeholder="Nome, original, traço ou nível — ex.: goblin, wolf, 7…"
+            aria-label="Pesquisar criatura"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key !== 'Enter') return
+              event.preventDefault()
+              if (filtered[0]) handleAdd(filtered[0])
+            }}
+          />
           <div className="mt-2 flex gap-2">
-            <Input
-              ref={searchRef}
-              type="search"
-              placeholder="Buscar criatura ou traço…"
-              aria-label="Buscar criatura"
-              className="flex-1"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
             <Select
               aria-label="Variante"
-              className="w-28"
+              className="min-w-0 flex-1"
               value={variant}
               onChange={(event) =>
                 setVariant(event.target.value as CreaturePowerVariant)
@@ -129,54 +234,41 @@ export function AddCreatureDialog({ onClose }: { onClose: () => void }) {
               type="number"
               aria-label="Quantidade"
               title="Quantas fichas adicionar por clique"
-              className="w-16 text-center"
+              className="w-20 text-center"
               min={1}
               max={20}
               value={quantity}
               onChange={(event) =>
-                setQuantity(Math.max(1, Math.round(Number(event.target.value)) || 1))
+                setQuantity(
+                  Math.max(1, Math.round(Number(event.target.value)) || 1),
+                )
               }
             />
           </div>
-          {feedback ? (
-            <p className="mt-1.5 text-[11px] text-success">{feedback}</p>
-          ) : (
-            <p className="mt-1.5 text-[11px] text-text-dim">
-              Clique em uma criatura para colocá-la no tabuleiro. O diálogo
-              fica aberto para adicionar várias.
-            </p>
-          )}
+          <div className="mt-1.5 flex items-start justify-between gap-3">
+            {feedback ? (
+              <p className="text-[11px] text-success">{feedback}</p>
+            ) : (
+              <p className="text-[11px] text-text-dim">
+                Clique numa criatura para colocá-la no tabuleiro. Enter adiciona
+                o primeiro resultado. O diálogo fica aberto para várias.
+              </p>
+            )}
+            <FilterCount
+              shown={filtered.length}
+              total={catalog.length}
+              className="shrink-0 pt-0.5"
+            />
+          </div>
         </div>
 
-        <ul className="min-h-0 flex-1 overflow-y-auto p-2">
-          {filtered.length === 0 ? (
-            <li className="px-2 py-6 text-center text-sm text-text-dim">
-              Nenhuma criatura para “{query}”.
-            </li>
-          ) : (
-            filtered.map((creature) => (
-              <li key={creature.id}>
-                <button
-                  type="button"
-                  className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left hover:bg-surface-2"
-                  onClick={() => handleAdd(creature)}
-                >
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium text-text">
-                      {creature.name}
-                    </span>
-                    <span className="block truncate text-[11px] text-text-dim">
-                      {creature.originalName} · {SIZE_LABELS[creature.size]}
-                    </span>
-                  </span>
-                  <span className="shrink-0 rounded border border-border px-1.5 py-0.5 text-[10px] text-text-muted">
-                    Nv {creature.level}
-                  </span>
-                </button>
-              </li>
-            ))
-          )}
-        </ul>
+        {filtered.length === 0 ? (
+          <p className="min-h-0 flex-1 px-4 py-8 text-center text-sm text-text-dim">
+            Nenhuma criatura para “{query.trim()}”.
+          </p>
+        ) : (
+          <CreaturePickList creatures={filtered} onAdd={handleAdd} />
+        )}
 
         <div className="border-t border-border/70 px-4 py-3">
           <div className="flex gap-2">

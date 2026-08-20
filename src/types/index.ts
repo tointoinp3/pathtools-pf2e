@@ -68,6 +68,7 @@ export type {
   EncounterShape,
 } from './encounter'
 export type {
+  CombatMapBackdrop,
   CombatSession,
   CombatToken,
   CombatTokenAbility,

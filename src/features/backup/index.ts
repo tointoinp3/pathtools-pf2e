@@ -18,6 +18,7 @@ export {
 } from './homebrewBackup'
 export {
   CharacterJsonButtons,
+  CombatJsonButtons,
   EditorJsonButtons,
   HomebrewJsonButtons,
   JsonExchangeButtons,

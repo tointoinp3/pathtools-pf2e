@@ -1,6 +1,6 @@
 [package]
 name = "app"
-version = "0.2.0"
+version = "0.2.1"
 description = "Pathtools 2e — ficha e compêndio local de Pathfinder 2e Remaster"
 authors = ["tointoinp3"]
 license = ""

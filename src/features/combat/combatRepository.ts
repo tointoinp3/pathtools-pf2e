@@ -3,7 +3,9 @@ import type { CombatSession } from '@/types'
 import { cloneToken } from '@/engine/combat'
 import { createId, nowIso } from '@/utils/id'
 import {
+  copyMapImage,
   copyTokenImage,
+  deleteMapImage,
   deleteTokenImagesFor,
 } from './combatImageRepository'
 
@@ -57,6 +59,7 @@ export async function deleteCombatSession(id: string): Promise<void> {
   await db.combatSessions.delete(id)
   if (session) {
     await deleteTokenImagesFor(session.tokens.map((token) => token.id))
+    await deleteMapImage(id)
   }
 }
 
@@ -83,5 +86,6 @@ export async function duplicateCombatSession(
     updatedAt: now,
   }
   await db.combatSessions.put(copy)
+  await copyMapImage(source.id, copy.id)
   return copy
 }

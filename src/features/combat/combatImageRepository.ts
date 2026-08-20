@@ -55,6 +55,20 @@ export async function copyTokenImage(
   return true
 }
 
+export async function copyMapImage(
+  fromSessionId: string,
+  toSessionId: string,
+): Promise<boolean> {
+  const source = await getTokenImage('map', fromSessionId)
+  if (!source) return false
+  await saveTokenImage('map', toSessionId, source.blob)
+  return true
+}
+
+export async function deleteMapImage(sessionId: string): Promise<void> {
+  await deleteTokenImage('map', sessionId)
+}
+
 /** Limpeza ao excluir um combate inteiro. */
 export async function deleteTokenImagesFor(
   tokenIds: string[],

@@ -144,6 +144,11 @@ const CombatListPage = lazy(() =>
     default: m.CombatListPage,
   })),
 )
+const TokenStudioPage = lazy(() =>
+  import('@/pages/TokenStudioPage').then((m) => ({
+    default: m.TokenStudioPage,
+  })),
+)
 const CombatTrackerPage = lazy(() =>
   import('@/pages/CombatTrackerPage').then((m) => ({
     default: m.CombatTrackerPage,
@@ -389,6 +394,14 @@ export function AppRouter() {
           element={
             <Suspense fallback={<RouteFallback />}>
               <CombatListPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="combate/token"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <TokenStudioPage />
             </Suspense>
           }
         />

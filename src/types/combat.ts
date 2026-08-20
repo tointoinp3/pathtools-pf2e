@@ -17,6 +17,10 @@ export interface LootTokenItem {
   quantity: number
   /** Já foi pego pelos jogadores. */
   taken: boolean
+  /** Ligação com o catálogo de equipamento (espada, poção…). */
+  definitionId?: string | null
+  /** Moedas em cobre, quando a linha veio de um saque de ouro. */
+  coinsCp?: number
 }
 
 /** Golpe do jogador congelado no token (com MAP e dano roláveis). */
@@ -115,6 +119,19 @@ export interface CombatToken {
   defeated: boolean
 }
 
+/**
+ * Imagem de cenário atrás do grid. Tamanho e posição em células
+ * (podem ser fracionários para alinhar os quadradinhos do mapa).
+ */
+export interface CombatMapBackdrop {
+  x: number
+  y: number
+  width: number
+  height: number
+  /** Largura / altura naturais da imagem. */
+  aspect: number
+}
+
 /** Estado completo de um combate salvo neste dispositivo. */
 export interface CombatSession {
   id: string
@@ -132,19 +149,24 @@ export interface CombatSession {
    * opacidade). Ausente em combates antigos.
    */
   paint?: Record<string, string>
+  /** Cenário importado; a imagem em si fica em `tokenImages` (scope map). */
+  mapBackdrop?: CombatMapBackdrop | null
+  /** 0–1; ausente = linhas no contraste atual (equivalente a 1). */
+  gridLineOpacity?: number
   notes: string
   createdAt: string
   updatedAt: string
 }
 
 /**
- * Imagem atrelada a fichas do grid.
+ * Imagem atrelada a fichas do grid ou ao cenário do combate.
  * `scope: 'creature'` vale para todas as fichas daquela criatura;
- * `scope: 'token'` vale só para uma ficha específica (sobrepõe a da criatura).
+ * `scope: 'token'` vale só para uma ficha específica (sobrepõe a da criatura);
+ * `scope: 'map'` é o fundo do tabuleiro (`ownerId` = id do combate).
  */
 export interface TokenImageRecord {
   id: string
-  scope: 'creature' | 'token'
+  scope: 'creature' | 'token' | 'map'
   ownerId: string
   blob: Blob
   mimeType: string

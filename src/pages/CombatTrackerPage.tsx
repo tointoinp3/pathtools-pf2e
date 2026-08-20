@@ -10,6 +10,7 @@ import {
   parseRgba,
   rotateFacing,
 } from '@/engine/combat'
+import { nudgeMap } from '@/engine/combatMap'
 import {
   CELL_SIZE_MAX,
   CELL_SIZE_MIN,
@@ -21,11 +22,16 @@ import {
   CombatGrid,
   type BoardTool,
 } from '@/features/combat/components/CombatGrid'
+import {
+  CombatMapAdjustBar,
+  CombatMapButtons,
+} from '@/features/combat/components/CombatMapControls'
 import { InitiativePanel } from '@/features/combat/components/InitiativePanel'
 import { TokenDetailsPanel } from '@/features/combat/components/TokenDetailsPanel'
 import { AddCreatureDialog } from '@/features/combat/components/AddCreatureDialog'
 import { AddCharacterDialog } from '@/features/combat/components/AddCharacterDialog'
 import { ImportEncounterDialog } from '@/features/combat/components/ImportEncounterDialog'
+import { runCombatExportOne } from '@/features/backup/combatBackup'
 import { useCombatStore } from '@/stores/combatStore'
 
 /**
@@ -115,12 +121,16 @@ export function CombatTrackerPage() {
   const [tool, setTool] = useState<BoardTool>('select')
   const [brushColor, setBrushColor] = useState('#d4a84b')
   const [brushOpacity, setBrushOpacity] = useState(0.4)
+  const [adjustingMap, setAdjustingMap] = useState(false)
   const toolRef = useRef(tool)
   toolRef.current = tool
+  const adjustingMapRef = useRef(adjustingMap)
+  adjustingMapRef.current = adjustingMap
 
   useEffect(() => {
     if (!id) return
     setNotFound(false)
+    setAdjustingMap(false)
     let cancelled = false
     void (async () => {
       const store = useCombatStore.getState()
@@ -171,6 +181,38 @@ export function CombatTrackerPage() {
       if (mod && key === 'd') {
         event.preventDefault()
         if (store.selectedTokenId) store.duplicateToken(store.selectedTokenId)
+        return
+      }
+
+      if (adjustingMapRef.current) {
+        if (event.key === 'Escape') {
+          event.preventDefault()
+          setAdjustingMap(false)
+          return
+        }
+        const mapMove: Record<string, { dx: number; dy: number }> = {
+          ArrowUp: { dx: 0, dy: -1 },
+          ArrowDown: { dx: 0, dy: 1 },
+          ArrowLeft: { dx: -1, dy: 0 },
+          ArrowRight: { dx: 1, dy: 0 },
+        }
+        const nudge = mapMove[event.key]
+        if (nudge && !mod) {
+          event.preventDefault()
+          const step = event.shiftKey ? 0.1 : 0.5
+          store.mutate((s) =>
+            s.mapBackdrop
+              ? {
+                  ...s,
+                  mapBackdrop: nudgeMap(
+                    s.mapBackdrop,
+                    nudge.dx * step,
+                    nudge.dy * step,
+                  ),
+                }
+              : s,
+          )
+        }
         return
       }
 
@@ -365,6 +407,28 @@ export function CombatTrackerPage() {
           <Button size="sm" onClick={() => setShowImport(true)}>
             Importar encontro
           </Button>
+          <Button
+            size="sm"
+            title="Baixa este combate em JSON (com mapa e fotos das fichas)"
+            onClick={() => {
+              void (async () => {
+                await store.flushSave()
+                const current = useCombatStore.getState().current
+                if (!current) return
+                try {
+                  await runCombatExportOne(current)
+                } catch (error) {
+                  window.alert(
+                    error instanceof Error
+                      ? error.message
+                      : 'Falha ao exportar o combate.',
+                  )
+                }
+              })()
+            }}
+          >
+            Exportar JSON
+          </Button>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 border-t border-border/60 px-3 py-1.5">
@@ -384,7 +448,10 @@ export function CombatTrackerPage() {
                     ? 'bg-info/20 text-info'
                     : 'text-text-muted hover:bg-surface-2 hover:text-text'
                 }`}
-                onClick={() => setTool(option.id)}
+                onClick={() => {
+                  setTool(option.id)
+                  if (option.id !== 'select') setAdjustingMap(false)
+                }}
               >
                 {option.label}
               </button>
@@ -400,6 +467,7 @@ export function CombatTrackerPage() {
             onChange={(event) => {
               setBrushColor(event.target.value)
               setTool('brush')
+              setAdjustingMap(false)
             }}
           />
           <span className="text-[11px] text-text-dim">Opacidade</span>
@@ -450,6 +518,24 @@ export function CombatTrackerPage() {
             Limpar pintura
           </Button>
 
+          <div className="mx-1 h-5 w-px bg-border" aria-hidden />
+
+          <CombatMapButtons
+            hasMap={Boolean(session.mapBackdrop)}
+            adjusting={adjustingMap}
+            onImported={() => {
+              setTool('select')
+              store.selectToken(null)
+            }}
+            onAdjustingChange={(next) => {
+              setAdjustingMap(next)
+              if (next) {
+                setTool('select')
+                store.selectToken(null)
+              }
+            }}
+          />
+
           <div className="ml-auto flex items-center gap-2">
             <span className="text-[11px] text-text-dim">Grid</span>
             <GridSizeField
@@ -480,8 +566,31 @@ export function CombatTrackerPage() {
                 }))
               }
             />
+            <span className="ml-2 text-[11px] text-text-dim">Linhas</span>
+            <input
+              type="range"
+              aria-label="Opacidade das linhas do grid"
+              title={`Linhas do grid: ${Math.round((session.gridLineOpacity ?? 1) * 100)}%`}
+              min={0}
+              max={100}
+              step={5}
+              value={Math.round((session.gridLineOpacity ?? 1) * 100)}
+              className="w-20 accent-[var(--color-accent)]"
+              onChange={(event) =>
+                store.mutateQuiet((s) => ({
+                  ...s,
+                  gridLineOpacity: Number(event.target.value) / 100,
+                }))
+              }
+            />
+            <span className="w-8 text-[11px] tabular-nums text-text-dim">
+              {Math.round((session.gridLineOpacity ?? 1) * 100)}%
+            </span>
           </div>
         </div>
+        {adjustingMap && session.mapBackdrop ? (
+          <CombatMapAdjustBar onDone={() => setAdjustingMap(false)} />
+        ) : null}
       </header>
 
       <div className="flex min-h-0 flex-1">
@@ -492,6 +601,7 @@ export function CombatTrackerPage() {
             brushColor={brushColor}
             brushOpacity={brushOpacity}
             onPickColor={handlePickColor}
+            adjustingMap={adjustingMap}
           />
         </main>
         <TokenDetailsPanel />

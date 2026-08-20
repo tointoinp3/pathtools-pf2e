@@ -32,6 +32,7 @@ const EXACT_TITLES: Record<string, string> = {
   '/bestiario/encontros/novo': 'Novo encontro',
   '/combate': 'Combate',
   '/combate/grid': 'Grid',
+  '/combate/token': 'Criar token',
   '/em-breve/combate': 'Combate',
   '/em-breve/mundo': 'Mundo',
 }
@@ -110,7 +111,7 @@ export function titleFromHref(href: string): string {
   if (encounterId) return 'Encontro'
 
   const combatId = pathMatch(pathname, /^\/combate\/([^/]+)$/)
-  if (combatId && combatId !== 'grid') return 'Combate'
+  if (combatId && combatId !== 'grid' && combatId !== 'token') return 'Combate'
 
   const creatureSession = pathMatch(pathname, /^\/bestiario\/([^/]+)\/sessao$/)
   if (creatureSession) return 'Ficha de sessão'

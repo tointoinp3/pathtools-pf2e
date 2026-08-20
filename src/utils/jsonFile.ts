@@ -13,6 +13,18 @@ export function downloadJson(filename: string, data: unknown): void {
   window.setTimeout(() => URL.revokeObjectURL(url), 1_000)
 }
 
+/** Baixa um Blob (PNG, etc.) com o nome pedido. */
+export function downloadBlob(filename: string, blob: Blob): void {
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = filename
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
+  window.setTimeout(() => URL.revokeObjectURL(url), 1_000)
+}
+
 export function jsonFormatOf(data: unknown): string | null {
   if (typeof data !== 'object' || data === null) return null
   const format = (data as { format?: unknown }).format

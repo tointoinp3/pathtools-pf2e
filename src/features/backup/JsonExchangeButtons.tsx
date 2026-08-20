@@ -11,6 +11,10 @@ import {
   runCharacterExportAll,
   runCharacterImport,
 } from '@/features/backup/characterBackup'
+import {
+  runCombatExportAll,
+  runCombatImport,
+} from '@/features/backup/combatBackup'
 
 interface JsonExchangeButtonsProps {
   onExport: () => void | Promise<void>
@@ -81,6 +85,19 @@ export function HomebrewJsonButtons({ kind }: { kind: HomebrewKind }) {
       }
       onExport={() => runHomebrewExport(kind)}
       onImport={() => runHomebrewImport()}
+    />
+  )
+}
+
+export function CombatJsonButtons() {
+  return (
+    <JsonExchangeButtons
+      exportLabel="Exportar todos"
+      importLabel="Importar JSON"
+      importTitle="Aceita um ou vários arquivos .json de uma vez"
+      exportTitle="Baixa todos os combates deste dispositivo"
+      onExport={() => runCombatExportAll()}
+      onImport={() => runCombatImport()}
     />
   )
 }

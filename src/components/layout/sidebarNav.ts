@@ -11,6 +11,7 @@ const EXACT_PATHS = new Set([
   '/bestiario',
   '/bestiario/encontros',
   '/combate',
+  '/combate/token',
 ])
 
 export function navItemIsActive(

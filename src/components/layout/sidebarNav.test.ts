@@ -34,6 +34,12 @@ describe('navItemIsActive', () => {
     assert.equal(navItemIsActive('/bestiario', loc('/bestiario/wolf')), false)
   })
 
+  test('criar token não acende meus combates', () => {
+    assert.equal(navItemIsActive('/combate', loc('/combate/token')), false)
+    assert.equal(navItemIsActive('/combate/token', loc('/combate/token')), true)
+    assert.equal(navItemIsActive('/combate/token', loc('/combate')), false)
+  })
+
   test('encontros não acendem criar criatura', () => {
     assert.equal(
       navItemIsActive('/bestiario?criar=1', loc('/bestiario/encontros')),
