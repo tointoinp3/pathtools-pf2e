@@ -67,6 +67,19 @@ export type {
   EncounterPlan,
   EncounterShape,
 } from './encounter'
+export type {
+  CombatSession,
+  CombatToken,
+  CombatTokenAbility,
+  CombatTokenCharacterSummary,
+  CombatTokenKind,
+  CombatTokenSpell,
+  CombatTokenStrike,
+  LootTokenItem,
+  TokenFacing,
+  TokenImageRecord,
+} from './combat'
+export { tokenImageId } from './combat'
 export type { CharacterGroup, SharedStash } from './group'
 export { MESA_STASH_ID, MESA_STASH_NAME } from './group'
 export type {
@@ -199,6 +212,12 @@ export type {
   CombatAction,
   CombatActionCost,
   CombatActionCategory,
+  ActionGroup,
+} from './action'
+export {
+  ACTION_GROUP_ORDER,
+  ACTION_GROUP_LABELS,
+  ACTION_GROUPS_HIDDEN_BY_DEFAULT,
 } from './action'
 export type {
   CompanionKind,

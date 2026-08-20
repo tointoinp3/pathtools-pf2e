@@ -74,7 +74,7 @@ const archaeologistArchetypeFeats: Feat[] = [
     archetypeId: 'archetype-archaeologist',
     isDedication: true,
     description:
-      'Você fica perito em Sociedade e Furtividade. Ganha +1 de circunstância em Recordar Conhecimento sobre história antiga, povos e culturas.',
+      'Você fica perito em Sociedade e Ladroagem. Ganha +1 de circunstância em Recordar Conhecimento sobre história antiga, povos e culturas.',
     effects: [
       { kind: 'skillRank', skillId: 'society', rank: 'expert' },
       { kind: 'skillRank', skillId: 'thievery', rank: 'expert' },
@@ -87,7 +87,7 @@ const archaeologistArchetypeFeats: Feat[] = [
     extraPrereq: [
       { kind: 'skillRank', skillId: 'society', rank: 'trained' },
       { kind: 'skillRank', skillId: 'thievery', rank: 'trained' },
-      { kind: 'text', label: 'Treinado em Sociedade e Furtividade' },
+      { kind: 'text', label: 'Treinado em Sociedade e Ladroagem' },
     ],
     sourcePage: 184,
     aonUrl: 'https://2e.aonprd.com/Archetypes.aspx?ID=237',

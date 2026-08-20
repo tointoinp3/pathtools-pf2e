@@ -266,7 +266,12 @@ export type FeatEffect =
   | {
       kind: 'textChoice'
       choiceId: string
-      options: Array<{ id: string; label: string }>
+      options: Array<{
+        id: string
+        label: string
+        /** Efeitos da ficha só depois desta opção estar escolhida. */
+        effects?: FeatEffect[]
+      }>
       hint?: string
       abilityName?: string
       abilityDescription?: string

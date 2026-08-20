@@ -746,6 +746,11 @@ const blessedOneArchetypeFeats: Feat[] = [
         },
       },
       {
+        kind: 'grantedFocusSpell',
+        originalName: 'Lay on Hands',
+        label: 'Imposição das mãos',
+      },
+      {
         kind: 'specialAbility',
         name: 'Imposição das mãos',
         description: 'Magia de devoção divina. Refoco por meditação, com ou sem culto.',

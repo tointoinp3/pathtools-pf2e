@@ -317,7 +317,7 @@ function detectAcuity(raw: string): SenseAcuity | undefined {
 
 function detectRangeLabel(raw: string): string | undefined {
   const meters = raw.match(/(\d+(?:[.,]\d+)?)\s*m\b/i)
-  if (meters) return `${meters[1].replace(',', '.')} m`
+  if (meters) return `${(meters[1] ?? '').replace(',', '.')} m`
   const feet = raw.match(/(\d+)\s*(?:pés|pes|feet|ft\.?)\b/i)
   if (feet) return formatSpeedMeters(Number(feet[1]))
   return undefined
@@ -331,8 +331,8 @@ export function parseSenseLabel(raw: string): {
 } {
   const trimmed = raw.trim()
   const paren = trimmed.match(/^(.*?)\s*\((.*)\)\s*$/)
-  const head = (paren ? paren[1] : trimmed).trim()
-  const extra = paren ? paren[2] : ''
+  const head = (paren ? (paren[1] ?? '') : trimmed).trim()
+  const extra = paren ? (paren[2] ?? '') : ''
   const subject = getSenseSubject(head) ?? getSenseSubject(trimmed)
   const acuity = detectAcuity(trimmed) ?? detectAcuity(extra)
   const rangeLabel = detectRangeLabel(trimmed) ?? detectRangeLabel(head)

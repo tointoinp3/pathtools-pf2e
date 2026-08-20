@@ -96,8 +96,8 @@ export function itemLookupCandidates(query: string): string[] {
   for (let i = 0; i < 5 && current; i += 1) {
     const match = current.match(/^(.*?)\s*\(([^)]+)\)\s*$/u)
     if (!match) break
-    const outer = match[1].trim()
-    const inner = match[2].trim()
+    const outer = (match[1] ?? '').trim()
+    const inner = (match[2] ?? '').trim()
     push(primary, outer)
     if (!isModifierNote(inner)) push(aliases, inner)
     current = outer

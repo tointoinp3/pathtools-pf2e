@@ -1,6 +1,11 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { ResolvedCharacterSheet } from '@/types'
-import type { CombatAction, CombatActionCost } from '@/types/action'
+import type { ActionGroup, CombatAction, CombatActionCost } from '@/types/action'
+import {
+  ACTION_GROUP_LABELS,
+  ACTION_GROUP_ORDER,
+  ACTION_GROUPS_HIDDEN_BY_DEFAULT,
+} from '@/types/action'
 import { BASIC_ACTIONS } from '@/data/seeds/basicActions'
 import {
   ActionCost,
@@ -28,6 +33,7 @@ const COST_FILTER_OPTIONS: Array<{ value: CostFilter; label: string }> = [
   { value: 'free', label: 'Livre' },
   { value: 'reaction', label: 'Reação' },
   { value: 'variable', label: 'Variável' },
+  { value: 'activity', label: 'Atividade' },
 ]
 
 const COST_ORDER: Record<CombatActionCost, number> = {
@@ -37,6 +43,27 @@ const COST_ORDER: Record<CombatActionCost, number> = {
   two: 3,
   three: 4,
   variable: 5,
+  activity: 6,
+}
+
+const HIDDEN_GROUPS_KEY = 'sp-sheet-hidden-action-groups'
+
+function readHiddenGroups(): ActionGroup[] {
+  try {
+    const raw = localStorage.getItem(HIDDEN_GROUPS_KEY)
+    if (raw == null) return [...ACTION_GROUPS_HIDDEN_BY_DEFAULT]
+    const parsed = JSON.parse(raw) as unknown
+    if (!Array.isArray(parsed)) return [...ACTION_GROUPS_HIDDEN_BY_DEFAULT]
+    return parsed.filter((value): value is ActionGroup =>
+      ACTION_GROUP_ORDER.includes(value as ActionGroup),
+    )
+  } catch {
+    return [...ACTION_GROUPS_HIDDEN_BY_DEFAULT]
+  }
+}
+
+function writeHiddenGroups(groups: ActionGroup[]) {
+  localStorage.setItem(HIDDEN_GROUPS_KEY, JSON.stringify(groups))
 }
 
 function isActionCost(
@@ -145,12 +172,16 @@ function CostFilterChips({
                 : 'border-border bg-surface-3 text-text-muted hover:border-border-strong hover:text-text'
             }`}
           >
-            {opt.value !== 'variable' ? (
+            {opt.value !== 'variable' && opt.value !== 'activity' ? (
               <ActionIcon type={opt.value} className="!h-[0.95em]" />
             ) : (
-              <span className="text-[10px] opacity-70">~</span>
+              <span className="text-[10px] opacity-70">
+                {opt.value === 'activity' ? '⏱' : '~'}
+              </span>
             )}
-            {opt.value === 'variable' ? opt.label : (
+            {opt.value === 'variable' || opt.value === 'activity' ? (
+              opt.label
+            ) : (
               <span className="sr-only">{opt.label}</span>
             )}
           </button>
@@ -196,7 +227,7 @@ function ActionCardShell({
   highlight?: boolean
 }) {
   const iconType =
-    actionType && actionType !== 'variable'
+    actionType && actionType !== 'variable' && actionType !== 'activity'
       ? (actionType as Pf2ActionType)
       : undefined
 
@@ -213,6 +244,8 @@ function ActionCardShell({
               <ActionCost type={iconType} />
             ) : actionType === 'variable' ? (
               <Badge className="!text-[9px]">Custo variável</Badge>
+            ) : actionType === 'activity' ? (
+              <Badge className="!text-[9px]">Atividade</Badge>
             ) : null}
             {badges}
           </>
@@ -272,13 +305,33 @@ function BasicActionCard({
   action: CombatAction
   sheet: ResolvedCharacterSheet
 }) {
+  const kindLabel =
+    action.category === 'basic'
+      ? 'Ação básica'
+      : action.category === 'specialty'
+        ? 'Ação especial'
+        : action.category === 'skill'
+          ? 'Perícia'
+          : action.category === 'feat'
+            ? 'Feito'
+            : 'Atividade'
+
   return (
     <ActionCardShell
       title={action.name}
       actionType={action.actionType}
-      meta={`${action.category === 'basic' ? 'Ação básica' : 'Ação especial'} · ${formatActionSource(action.source)}`}
+      meta={`${kindLabel} · ${formatActionSource(action.source)}`}
       badges={
         <>
+          {action.activityTime ? (
+            <Badge className="!text-[9px]">{action.activityTime}</Badge>
+          ) : null}
+          {action.featRequired ? (
+            <Badge className="!text-[9px]">Requer feito</Badge>
+          ) : null}
+          {action.trainedOnly ? (
+            <Badge className="!text-[9px]">Treinado</Badge>
+          ) : null}
           {action.traits.map((t) => (
             <Badge key={t} className="!text-[9px]">
               {localizeTraitLabel(t)}
@@ -314,6 +367,62 @@ function BasicActionCard({
   )
 }
 
+function GroupVisibilityChips({
+  hidden,
+  onChange,
+}: {
+  hidden: ActionGroup[]
+  onChange: (next: ActionGroup[]) => void
+}) {
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-text-dim">
+          Categorias
+        </span>
+        {hidden.length > 0 && (
+          <button
+            type="button"
+            onClick={() => onChange([])}
+            className="text-[10px] text-text-dim hover:text-accent"
+          >
+            Mostrar todas
+          </button>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-1">
+        {ACTION_GROUP_ORDER.map((group) => {
+          const isHidden = hidden.includes(group)
+          const label = ACTION_GROUP_LABELS[group]
+          return (
+            <button
+              key={group}
+              type="button"
+              title={isHidden ? `Mostrar ${label}` : `Esconder ${label}`}
+              onClick={() => {
+                if (isHidden) onChange(hidden.filter((g) => g !== group))
+                else onChange([...hidden, group])
+              }}
+              className={`inline-flex items-center rounded-md border px-2 py-1 text-[11px] font-medium transition-all ${
+                isHidden
+                  ? 'border-border bg-surface-3 text-text-dim line-through decoration-text-dim/70'
+                  : 'border-accent/50 bg-accent/15 text-accent'
+              }`}
+            >
+              {!isHidden && <span className="mr-1 text-accent">✓</span>}
+              {label}
+            </button>
+          )
+        })}
+      </div>
+      <p className="mt-1 text-[10px] text-text-dim">
+        Clique para esconder ou mostrar. Exploração, social, viagem e intervalo
+        começam ocultos.
+      </p>
+    </div>
+  )
+}
+
 interface CombatActionsPanelProps {
   sheet: ResolvedCharacterSheet
 }
@@ -321,7 +430,12 @@ interface CombatActionsPanelProps {
 export function CombatActionsPanel({ sheet }: CombatActionsPanelProps) {
   const [query, setQuery] = useState('')
   const [costFilters, setCostFilters] = useState<CostFilter[]>([])
-  const [scope, setScope] = useState<Array<'mine' | 'basic' | 'specialty'>>([])
+  const [scope, setScope] = useState<Array<'mine' | 'catalog'>>([])
+  const [hiddenGroups, setHiddenGroups] = useState<ActionGroup[]>(readHiddenGroups)
+
+  useEffect(() => {
+    writeHiddenGroups(hiddenGroups)
+  }, [hiddenGroups])
 
   const q = query.trim().toLowerCase()
 
@@ -343,59 +457,57 @@ export function CombatActionsPanel({ sheet }: CombatActionsPanelProps) {
     })
   }, [characterActions, costFilters, q, scope])
 
-  const filteredBasic = useMemo(() => {
-    if (scope.length > 0 && !scope.includes('basic')) return []
-    return BASIC_ACTIONS.filter((a) => a.category === 'basic')
-      .filter((a) => matchesCostFilter(a.actionType, costFilters))
-      .filter((a) =>
+  const filteredCatalog = useMemo(() => {
+    if (scope.length > 0 && !scope.includes('catalog')) return []
+    return BASIC_ACTIONS.filter((action) => !hiddenGroups.includes(action.group))
+      .filter((action) => matchesCostFilter(action.actionType, costFilters))
+      .filter((action) =>
         matchesQuery(
           [
-            a.name,
-            a.originalName,
-            a.description,
-            a.trigger,
-            a.requirements,
-            ...a.traits,
+            action.name,
+            action.originalName,
+            action.description,
+            action.trigger,
+            action.requirements,
+            ACTION_GROUP_LABELS[action.group],
+            ...action.traits,
           ]
             .filter(Boolean)
             .join(' '),
           q,
         ),
       )
-      .sort((a, b) => COST_ORDER[a.actionType] - COST_ORDER[b.actionType] || a.name.localeCompare(b.name, 'pt-BR'))
-  }, [costFilters, q, scope])
-
-  const filteredSpecialty = useMemo(() => {
-    if (scope.length > 0 && !scope.includes('specialty')) return []
-    return BASIC_ACTIONS.filter((a) => a.category === 'specialty')
-      .filter((a) => matchesCostFilter(a.actionType, costFilters))
-      .filter((a) =>
-        matchesQuery(
-          [
-            a.name,
-            a.originalName,
-            a.description,
-            a.trigger,
-            a.requirements,
-            ...a.traits,
-          ]
-            .filter(Boolean)
-            .join(' '),
-          q,
-        ),
+      .sort(
+        (a, b) =>
+          COST_ORDER[a.actionType] - COST_ORDER[b.actionType] ||
+          a.name.localeCompare(b.name, 'pt-BR'),
       )
-      .sort((a, b) => COST_ORDER[a.actionType] - COST_ORDER[b.actionType] || a.name.localeCompare(b.name, 'pt-BR'))
-  }, [costFilters, q, scope])
+  }, [costFilters, hiddenGroups, q, scope])
 
-  const total =
-    filteredMine.length + filteredBasic.length + filteredSpecialty.length
+  const catalogByGroup = useMemo(() => {
+    const map = new Map<ActionGroup, CombatAction[]>()
+    for (const action of filteredCatalog) {
+      const list = map.get(action.group) ?? []
+      list.push(action)
+      map.set(action.group, list)
+    }
+    return ACTION_GROUP_ORDER.filter((group) => map.has(group)).map((group) => ({
+      group,
+      actions: map.get(group) ?? [],
+    }))
+  }, [filteredCatalog])
+
+  const total = filteredMine.length + filteredCatalog.length
+  const visibleCatalogTotal = BASIC_ACTIONS.filter(
+    (action) => !hiddenGroups.includes(action.group),
+  ).length
 
   return (
     <Panel
       quiet
       compact
       title="Ações"
-      subtitle="feitos no topo · básicas e especiais abaixo"
+      subtitle="feitos no topo · referência por categoria abaixo"
     >
       <div className="space-y-3">
         <Input
@@ -406,7 +518,7 @@ export function CombatActionsPanel({ sheet }: CombatActionsPanelProps) {
         />
         <FilterCount
           shown={total}
-          total={characterActions.length + BASIC_ACTIONS.length}
+          total={characterActions.length + visibleCatalogTotal}
         />
 
         <div>
@@ -416,13 +528,14 @@ export function CombatActionsPanel({ sheet }: CombatActionsPanelProps) {
           <CostFilterChips selected={costFilters} onChange={setCostFilters} />
         </div>
 
+        <GroupVisibilityChips hidden={hiddenGroups} onChange={setHiddenGroups} />
+
         <MultiFilter
           label="Origem"
           emptyLabel="Todas"
           options={[
             { value: 'mine', label: 'Seus feitos / habilidades' },
-            { value: 'basic', label: 'Ações básicas' },
-            { value: 'specialty', label: 'Ações especiais' },
+            { value: 'catalog', label: 'Referência da mesa' },
           ]}
           selected={scope}
           onChange={setScope}
@@ -430,8 +543,8 @@ export function CombatActionsPanel({ sheet }: CombatActionsPanelProps) {
 
         <p className="text-[11px] text-text-dim">
           {total === 0
-            ? 'Nada com esses filtros.'
-            : `${total} ação${total === 1 ? '' : 'ões'} · referência Player Core / AoN`}
+            ? 'Nada com esses filtros. Mostre uma categoria ou limpe a busca.'
+            : `${total} ação${total === 1 ? '' : 'ões'} · Player Core / Player Core 2 / GM Core`}
         </p>
 
         {filteredMine.length > 0 && (
@@ -468,37 +581,30 @@ export function CombatActionsPanel({ sheet }: CombatActionsPanelProps) {
             </p>
           )}
 
-        {filteredBasic.length > 0 && (
-          <section>
-            <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-text-muted">
-              Ações básicas
-              <span className="ml-1.5 font-normal text-text-dim">
-                ({filteredBasic.length})
+        {catalogByGroup.map(({ group, actions }) => (
+          <section key={group}>
+            <h3 className="mb-1.5 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+              <span>
+                {ACTION_GROUP_LABELS[group]}
+                <span className="ml-1.5 font-normal text-text-dim">
+                  ({actions.length})
+                </span>
               </span>
+              <button
+                type="button"
+                onClick={() => setHiddenGroups([...hiddenGroups, group])}
+                className="text-[10px] font-normal normal-case tracking-normal text-text-dim hover:text-accent"
+              >
+                Esconder
+              </button>
             </h3>
             <ul className="grid items-start gap-2 sm:grid-cols-2">
-              {filteredBasic.map((action) => (
+              {actions.map((action) => (
                 <BasicActionCard key={action.id} action={action} sheet={sheet} />
               ))}
             </ul>
           </section>
-        )}
-
-        {filteredSpecialty.length > 0 && (
-          <section>
-            <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-text-muted">
-              Ações especiais
-              <span className="ml-1.5 font-normal text-text-dim">
-                ({filteredSpecialty.length})
-              </span>
-            </h3>
-            <ul className="grid items-start gap-2 sm:grid-cols-2">
-              {filteredSpecialty.map((action) => (
-                <BasicActionCard key={action.id} action={action} sheet={sheet} />
-              ))}
-            </ul>
-          </section>
-        )}
+        ))}
       </div>
     </Panel>
   )

@@ -23,6 +23,11 @@ export const ACTION_LABELS_PT: Record<Pf2ActionType, string> = {
   passive: 'Passivo',
 }
 
+/** Confere se um texto solto (dado do catálogo) é um custo de ação válido. */
+export function isPf2ActionType(value: unknown): value is Pf2ActionType {
+  return typeof value === 'string' && value in ACTION_LABELS_PT
+}
+
 /** Tipos com ícone (o passivo não tem figura). */
 export const ACTION_ICON_TYPES: Array<Exclude<Pf2ActionType, 'passive'>> = [
   'one',

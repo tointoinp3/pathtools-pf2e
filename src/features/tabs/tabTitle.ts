@@ -30,6 +30,8 @@ const EXACT_TITLES: Record<string, string> = {
   '/bestiario': 'Bestiário',
   '/bestiario/encontros': 'Encontros',
   '/bestiario/encontros/novo': 'Novo encontro',
+  '/combate': 'Combate',
+  '/combate/grid': 'Grid',
   '/em-breve/combate': 'Combate',
   '/em-breve/mundo': 'Mundo',
 }
@@ -45,12 +47,14 @@ const QUERY_CATALOG_TITLES: Record<string, (id: string) => string | null> = {
 export function homeHrefForMode(mode: WorkspaceMode): string {
   if (mode === 'loot') return '/saques'
   if (mode === 'bestiary') return '/bestiario'
+  if (mode === 'combat') return '/combate'
   return DEFAULT_HOME_HREF
 }
 
 export function homeTitleForMode(mode: WorkspaceMode): string {
   if (mode === 'loot') return 'Saques'
   if (mode === 'bestiary') return 'Bestiário'
+  if (mode === 'combat') return 'Combate'
   return 'Personagens'
 }
 
@@ -104,6 +108,9 @@ export function titleFromHref(href: string): string {
   if (pathname === '/bestiario/encontros/novo') return 'Novo encontro'
   const encounterId = pathMatch(pathname, /^\/bestiario\/encontros\/([^/]+)$/)
   if (encounterId) return 'Encontro'
+
+  const combatId = pathMatch(pathname, /^\/combate\/([^/]+)$/)
+  if (combatId && combatId !== 'grid') return 'Combate'
 
   const creatureSession = pathMatch(pathname, /^\/bestiario\/([^/]+)\/sessao$/)
   if (creatureSession) return 'Ficha de sessão'

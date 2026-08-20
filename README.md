@@ -1,7 +1,8 @@
 # Pathtools 2e
 
-Aplicativo modular local para **Pathfinder 2e Remaster**, em português, pensado
-para crescer (personagens, combate, mundo, campanhas e homebrew).
+Ferramenta de mesa para **Pathfinder 2e Remaster**, em português: ficha,
+compêndio, bestiário, encontros, saque e combate em grid. Roda no seu aparelho,
+sem conta e sem nuvem.
 
 Sem fins lucrativos, feito por fã. Conteúdo de regras vem do
 [Archives of Nethys](https://2e.aonprd.com/) sob a Community Use Policy da
@@ -25,42 +26,79 @@ assim**. Fichas do site e do programa não se misturam.
 
 ## Estado atual
 
-**Character Builder funcional.** Combate de mesa (grid, encontros) e Mundo /
-campanhas ainda não existem — as rotas mostram “em breve”.
+Ficha, compêndio, bestiário, encontros, saque e combate em grid já funcionam.
+O módulo de **Mundo** (lore, NPCs, campanhas) ainda não existe — a rota mostra
+"em breve".
 
-Já inclui:
+### Para o jogador
 
 - criação e gerenciamento de personagens, com retrato (zoom / enquadramento) e
-  assistente passo a passo (checklist + navegação travada até ancestralidade,
-  origem e classe)
+  assistente passo a passo: uma checklist mostra o que falta e leva direto à
+  pendência (herança, aumento de atributo, magia emblemática, feito de
+  dedicação…)
 - ficha com atributos, perícias, Conhecimentos (Lore), perícias homebrew,
   progressão por nível, conexões e mural de notas
-- engine de cálculos e modificadores com breakdown rastreável
-- **30 ancestralidades Remaster** (Player Core, PC2, Howl of the Wild, Tian Xia,
-  Guns & Gears Remastered, Battlecry!) com heranças e feitos — mais **17
-  heranças versáteis** (Aiuvarin, Dromaar, Nephilim, Dragonblood, Changeling,
-  Dhampir, Duskwalker, Hungerseed, Reflection, Beastkin e geniekin)
-- **29 classes Remaster** (Player Core, PC2, Impossible Magic, Rage of Elements,
-  Dark Archives, Guns & Gears, War of Immortals, Battlecry!), com subclasses,
-  magias concedidas e kits iniciais onde o AoN publica (16 kits; as demais
-  classes usam 15 po)
-- **253 origens oficiais** Remaster
-- feitos Remaster de ancestralidade, classe, perícia, gerais e arquétipos
-- **137 arquétipos** (multiclasse e outros)
-- catálogo de magias Remaster (tradições, foco e truques de classe), rituais e
-  divindades
-- equipamento Remaster (armas, armaduras, runas, consumíveis, Treasure Vault…)
-- companheiros, familiares (forma + específicos) e catálogo de animais para
-  Animal Despertado
-- painel de combate da ficha (ações básicas PF2e, rolagens, cargas como Golpe
-  Mágico)
+- engine de cálculos e modificadores com **breakdown rastreável**: passe o
+  mouse num número e veja de onde veio cada parcela
+- painel de combate da ficha: ações básicas PF2e, rolagens, condições,
+  equipamento ativo e recursos de classe
+- companheiros, familiares (forma + específicos) e eidolons
+- ficha de sessão pronta para imprimir
 - bandeja de dados com histórico
-- editor de origens homebrew
+
+### Para o mestre
+
+- **bestiário** com fichas completas: ataques, magias, habilidades, fraquezas e
+  CDs de Recordar Conhecimento, cada criatura em versão Normal, Elite e Fraca,
+  com rolagens clicáveis e ficha de sessão para imprimir
+- **gerador de encontros** pelo orçamento de XP do GM Core (trivial a extremo),
+  ajustado pelo tamanho do grupo
+- **gerador de saque** pela tabela de tesouro por nível do GM Core — por nível,
+  por encontro (com a fatia de cada severidade) ou livre, com re-sorteio linha
+  a linha e exportação em texto
+- **combate em grid**: arrastar e redimensionar fichas, pincel de terreno com
+  conta-gotas, zoom, iniciativa com rodada e turno, PV e condições por ficha
+  (a iniciativa já desconta penalidade de condição) e importação de um
+  encontro salvo inteiro
+
+### Para o grupo
+
+- grupos de mesa e baú compartilhado
+- transferir item e dinheiro entre fichas e baús, com o inventário da mesa
+  numa tela só
+
+### Conteúdo Remaster
+
+| | |
+|---|---|
+| Criaturas | **2.127** (níveis −1 a 25), em 449 famílias |
+| Feitos | **5.053** |
+| Itens | **4.166** |
+| Magias | **1.448** |
+| Divindades | **423** |
+| Origens | **315** |
+| Arquétipos | **178** (29 de multiclasse) |
+| Rituais | **115** |
+| Guias de regra em PT-BR | **78** |
+| Ancestralidades | **31**, mais **17 heranças versáteis** |
+| Classes | **29**, com subclasses, magias concedidas e kits iniciais |
+
+Vem de Player Core, Player Core 2, GM Core, Monster Core, Monster Core 2,
+Treasure Vault, Howl of the Wild, Tian Xia, Guns & Gears, Rage of Elements,
+Impossible Magic, Dark Archives, War of Immortals, Battlecry!, NPC Core,
+Divine Mysteries e das Adventure Paths — 59 fontes no total.
+
+### Em qualquer tela
+
+- **homebrew** de ancestralidade, herança, arquétipo, classe, companheiro,
+  divindade, equipamento, feito, magia, origem e ritual — mesmas entidades do
+  conteúdo oficial, com guia de preenchimento em cada editor
+- exportar / importar JSON de fichas e de homebrew, em lote
+- abas no estilo navegador, tema claro / escuro e escala de interface
 - persistência local (IndexedDB + Dexie) com auto-save
 
-Ainda **não** inclui: simulador de encontro / grid de combate, worldbuilder,
-campanhas, nem bestiário para o mestre. Kitsune, Nagaji e Poppet ficam de fora
-enquanto as páginas de ancestralidade no Archives of Nethys forem Legacy.
+Kitsune, Nagaji e Poppet ficam de fora enquanto as páginas de ancestralidade no
+Archives of Nethys forem Legacy.
 
 ## Stack
 
@@ -72,8 +110,8 @@ enquanto as páginas de ancestralidade no Archives of Nethys forem Legacy.
 - React Router 7
 - oxlint
 
-Web app local — arquitetura compatível com empacotamento futuro via Tauri
-(sem Electron).
+Web app local, empacotado para Windows com **Tauri** (sem Electron). O mesmo
+código serve o site e o `.exe`.
 
 ## Instalação
 
@@ -127,19 +165,24 @@ extensão, que no app quem resolve é o Vite. Para rodar em modo contínuo:
 npm run test:watch
 ```
 
-Os testes ficam ao lado do que testam (`src/engine/*.test.ts`) e cobrem a
-lógica onde um erro passa despercebido numa conferência manual:
+Os testes ficam ao lado do que testam (`*.test.ts`) e miram a lógica onde um
+erro passa despercebido numa conferência manual:
 
 - `partyTransferCore` — mover item e ouro entre fichas e baús: o total do
   grupo não pode mudar, pilha dividida não pode duplicar nem sumir, munição
   carregada perde o vínculo ao trocar de dono.
 - `lootGenerator` / `lootTreasure` — orçamento por nível, ajuste de tamanho
   do grupo, fatia por severidade do encontro e itens permanentes sem repetir.
+- `encounterGenerator` — XP por nível relativo e orçamento por severidade.
+- `combat` — iniciativa, ordem de turno, rodada e efeito de condição.
+- `creatureBuilding` — ajuste Elite / Fraca.
+- `parseFeatEffects` — leitura de efeitos a partir do texto do feito.
+- `tabLogic` / `tabTitle` / `sidebarNav` — navegação e abas.
 
-`partyTransfer.ts` continua sendo a porta de entrada (banco, stores e as
-mensagens em português); a matemática mora em `partyTransferCore.ts`, sem
-depender de UI nem de IndexedDB — é por isso que dá para testar sem abrir o
-navegador.
+O padrão para código testável é o do `partyTransfer.ts`: ele continua sendo a
+porta de entrada (banco, stores e as mensagens em português), mas a matemática
+mora em `partyTransferCore.ts`, sem depender de UI nem de IndexedDB — é por
+isso que dá para testar sem abrir o navegador.
 
 ## Estrutura
 
@@ -147,8 +190,10 @@ navegador.
 src/
   app/           # shell e rotas
   components/    # UI compartilhada, layout e dados
-  features/      # personagens, ancestralidades, classes, origens, feitos,
-                 # magias, equipamento, companheiros, rituais, divindades
+  features/      # personagens, bestiário, combate, encontros, saque, grupos,
+                 # compêndio (ancestralidades, classes, origens, feitos,
+                 # magias, equipamento, companheiros, rituais, divindades),
+                 # abas, backup e configurações
   data/seeds/    # conteúdo oficial Remaster
   data/i18n/     # traduções PT-BR de nomes e descrições
   db/            # Dexie + versionamento + seed
@@ -179,15 +224,17 @@ e descrições PT em `src/data/i18n/` e **suba o `CURRENT_SEED_VERSION`**.
 
 ## Persistência
 
-IndexedDB via Dexie, atualmente em `db.version(4)`.
+IndexedDB via Dexie, atualmente em `db.version(14)`.
 
 Tabelas:
 
-- `characters`
-- `portraits` (Blob do retrato + enquadramento)
-- `backgrounds`, `ancestries`, `heritages`, `classes`, `feats`
-- `contentSources`
-- `settings`
+- `characters`, `portraits` (Blob do retrato + enquadramento)
+- catálogo: `backgrounds`, `ancestries`, `heritages`, `classes`, `feats`,
+  `archetypes`, `companionTypes`, `itemDefinitions`, `spells`, `rituals`,
+  `deities`, `creatures`
+- mesa: `lootHauls`, `encounters`, `combatSessions`, `tokenImages`,
+  `characterGroups`, `sharedStashes`
+- `contentSources`, `settings`
 
 O seed é **idempotente**: conteúdo oficial ausente é inserido e, quando
 `CURRENT_SEED_VERSION` sobe, os registros oficiais são atualizados via upsert.
@@ -236,13 +283,16 @@ ignoradas.
 
 ## Homebrew
 
-Em **Compêndio → Origens**:
+Em **Compêndio**, cada catálogo tem editor próprio — ancestralidade, herança,
+arquétipo, classe, companheiro, divindade, equipamento, feito, magia, origem e
+ritual:
 
-- criar origem
-- editar / excluir homebrew
-- duplicar oficial como homebrew
+- criar do zero
+- editar / excluir o que é seu
+- duplicar um oficial como homebrew para usar de ponto de partida
 
-Benefícios são interpretados pelos dados (sem `if` por ID de origem).
+Cada editor traz um guia de preenchimento ao lado dos campos. Benefícios são
+interpretados pelos dados (sem `if` por ID).
 
 ## Engine
 
@@ -256,6 +306,11 @@ Camada em `src/engine/`, sem nenhuma dependência de UI:
 - conjuração (slots, preparação, foco, magias emblemáticas)
 - dinheiro inicial e kit de classe
 - `evaluateFormula` — avaliador seguro para as fórmulas das Conexões
+- `combat` — iniciativa, turno, rodada e efeito de condição no tabuleiro
+- `encounterGenerator` — orçamento de XP por severidade e tamanho do grupo
+- `lootGenerator` / `lootTreasure` — tabela de tesouro do GM Core
+- `partyTransferCore` — item e dinheiro entre fichas e baús
+- `creatureBuilding` — ajuste Elite / Fraca do bestiário
 
 Nada derivado é gravado no banco: a ficha é sempre recalculada. A UI apenas
 exibe resultados.

@@ -3,7 +3,6 @@ import type {
   Character,
   CharacterClass,
   FeatSlot,
-  LevelAttributeBoostLevel,
   ProficiencyRank,
   SkillId,
 } from '@/types'

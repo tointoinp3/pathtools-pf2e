@@ -35,6 +35,12 @@ const SKILL_PATTERNS: Array<{ id: SkillId; re: RegExp }> = [
 const TRAIN_SENTENCE =
   /(?:you (?:gain the trained proficiency(?: rank)? in|become trained in|are trained in|were trained in)|you're trained in|fica(?:m)? treinado(?:a|s)? em|você fica treinado(?:a)? em|voc[eê] (?:é|e) treinado(?:a)? em)\s+([^.]+?)(?:\.|$)/gi
 
+const EXPERT_SENTENCE =
+  /(?:you become an expert in|you're an expert in|fica(?:m)? perito(?:a|s)? em|você fica perito(?:a)? em)\s+([^.]+?)(?:\.|$)/gi
+
+const MASTER_SENTENCE =
+  /(?:you become a master in|you're a master in|fica(?:m)? mestre(?:s)? em|você fica mestre em)\s+([^.]+?)(?:\.|$)/gi
+
 const WEAPON_OR_SPELL =
   /^(?:with |with the |in all weapons|in modificador|em modificador|em ataque)/i
 
@@ -46,7 +52,20 @@ function extractSkillIds(text: string): SkillId[] {
   return found
 }
 
+function mentionsBump(description: string): boolean {
+  return (
+    /if you were already trained.{0,80}become an expert/i.test(description) ||
+    /if already trained.{0,80}(?:you )?(?:instead )?become an expert/i.test(
+      description,
+    ) ||
+    /se já (?:for|fosse|é|era) treinado.{0,80}fica perito/i.test(description)
+  )
+}
+
 function mentionsReplace(description: string): boolean {
+  if (mentionsBump(description) && !/skill of your choice|outra per[ií]cia/i.test(description)) {
+    return false
+  }
   return (
     /instead become trained in a skill of your choice/i.test(description) ||
     /if you (?:would automatically become|would automatically be|were already|are already|would be automatically) trained/i.test(
@@ -79,10 +98,27 @@ function loreNameFromMatch(raw: string): string[] {
   return [cleaned]
 }
 
+function skillGrant(
+  skillId: SkillId,
+  rank: ProficiencyRank,
+  replaceIfTrained: boolean,
+  bumpIfAlready: boolean,
+): FeatEffect {
+  return {
+    kind: 'skillRank',
+    skillId,
+    rank,
+    replaceIfTrained,
+    bumpIfAlready: bumpIfAlready || undefined,
+  }
+}
+
 function effectsFromSkillFragment(
   fragment: string,
   replaceIfTrained: boolean,
   choiceSeq: { n: number },
+  rank: ProficiencyRank = 'trained',
+  bumpIfAlready = false,
 ): FeatEffect[] {
   const text = fragment.trim()
   if (!text || WEAPON_OR_SPELL.test(text)) return []
@@ -97,8 +133,9 @@ function effectsFromSkillFragment(
         kind: 'skillRankChoice',
         choiceId: `choice-${choiceSeq.n}`,
         skillOptions: opts,
-        rank: 'trained',
+        rank,
         replaceIfTrained,
+        bumpIfAlready: bumpIfAlready || undefined,
       },
     ]
   }
@@ -107,20 +144,18 @@ function effectsFromSkillFragment(
   if (andEither) {
     const fixed = extractSkillIds(andEither[1] ?? '')
     const opts = extractSkillIds(andEither[2] ?? '')
-    const effects: FeatEffect[] = fixed.map((skillId) => ({
-      kind: 'skillRank' as const,
-      skillId,
-      rank: 'trained' as const,
-      replaceIfTrained,
-    }))
+    const effects: FeatEffect[] = fixed.map((skillId) =>
+      skillGrant(skillId, rank, replaceIfTrained, bumpIfAlready),
+    )
     if (opts.length > 0) {
       choiceSeq.n += 1
       effects.push({
         kind: 'skillRankChoice',
         choiceId: `either-${choiceSeq.n}`,
         skillOptions: opts,
-        rank: 'trained',
+        rank,
         replaceIfTrained,
+        bumpIfAlready: bumpIfAlready || undefined,
       })
     }
     return effects
@@ -142,28 +177,37 @@ function effectsFromSkillFragment(
         kind: 'skillRankChoice',
         choiceId: `either-${choiceSeq.n}`,
         skillOptions: opts,
-        rank: 'trained',
+        rank,
         replaceIfTrained,
+        bumpIfAlready: bumpIfAlready || undefined,
       })
     }
     for (const skillId of rest) {
-      effects.push({
-        kind: 'skillRank',
-        skillId,
-        rank: 'trained',
-        replaceIfTrained,
-      })
+      effects.push(skillGrant(skillId, rank, replaceIfTrained, bumpIfAlready))
     }
     return effects
   }
 
   const skills = extractSkillIds(text)
-  return skills.map((skillId) => ({
-    kind: 'skillRank' as const,
-    skillId,
-    rank: 'trained' as const,
-    replaceIfTrained,
-  }))
+  const hasOr = /(?:\bou\b|\bor\b)/i.test(text)
+  const hasAnd = /(?:\be\b|\band\b)/i.test(text)
+  if (hasOr && !hasAnd && skills.length >= 2) {
+    choiceSeq.n += 1
+    return [
+      {
+        kind: 'skillRankChoice',
+        choiceId: `choice-${choiceSeq.n}`,
+        skillOptions: skills,
+        rank,
+        replaceIfTrained,
+        bumpIfAlready: bumpIfAlready || undefined,
+      },
+    ]
+  }
+
+  return skills.map((skillId) =>
+    skillGrant(skillId, rank, replaceIfTrained, bumpIfAlready),
+  )
 }
 
 function rankFromWord(raw: string): ProficiencyRank | null {
@@ -173,6 +217,47 @@ function rankFromWord(raw: string): ProficiencyRank | null {
   if (t.startsWith('expert') || t.startsWith('peri')) return 'expert'
   if (t.startsWith('train') || t.startsWith('trein')) return 'trained'
   return null
+}
+
+function parseSavePerceptionRanks(description: string): FeatEffect[] {
+  const effects: FeatEffect[] = []
+  const seen = new Set<string>()
+
+  function addSave(save: 'fortitude' | 'reflex' | 'will', rank: ProficiencyRank) {
+    const key = `save:${save}:${rank}`
+    if (seen.has(key)) return
+    seen.add(key)
+    effects.push({ kind: 'saveRank', save, rank })
+  }
+
+  function addPerception(rank: ProficiencyRank) {
+    const key = `perception:${rank}`
+    if (seen.has(key)) return
+    seen.add(key)
+    effects.push({ kind: 'perceptionRank', rank })
+  }
+
+  const saveRe =
+    /proficiency rank for (fortitude|reflex|will) saves? increases to (trained|expert|master|legendary)|profici[eê]ncia em salvaguardas? de (fortitude|reflexos?|vontade) sobe para (treinado|perito|mestre|lend[aá]rio)/gi
+  let saveMatch: RegExpExecArray | null
+  while ((saveMatch = saveRe.exec(description)) !== null) {
+    const rawSave = (saveMatch[1] || saveMatch[3] || '').toLowerCase()
+    const rank = rankFromWord(saveMatch[2] || saveMatch[4] || '')
+    if (!rank) continue
+    if (rawSave.startsWith('fort')) addSave('fortitude', rank)
+    else if (rawSave.startsWith('reflex')) addSave('reflex', rank)
+    else addSave('will', rank)
+  }
+
+  const perceptionRe =
+    /proficiency rank for perception increases to (trained|expert|master|legendary)|percep[cç][aã]o sobe para (treinado|perito|mestre|lend[aá]rio)|fica (treinado|perito|mestre|lend[aá]rio) em percep[cç][aã]o/gi
+  let percMatch: RegExpExecArray | null
+  while ((percMatch = perceptionRe.exec(description)) !== null) {
+    const rank = rankFromWord(percMatch[1] || percMatch[2] || percMatch[3] || '')
+    if (rank) addPerception(rank)
+  }
+
+  return effects
 }
 
 /** Treino de armas/armaduras em feitos (ex.: Armadura de Sacerdote de Guerra). */
@@ -315,15 +400,44 @@ export function parseFeatDescriptionEffects(feat: Feat): FeatEffect[] {
   }
 
   const replaceIfTrained = mentionsReplace(description)
+  const bumpIfAlready = mentionsBump(description)
   const choiceSeq = { n: 0 }
-  const trainRe = new RegExp(TRAIN_SENTENCE.source, 'gi')
-  let match: RegExpExecArray | null
-  while ((match = trainRe.exec(description)) !== null) {
-    const fragment = match[1] ?? ''
+  const skillSentencePasses: Array<{
+    re: RegExp
+    rank: ProficiencyRank
+  }> = [
+    { re: new RegExp(TRAIN_SENTENCE.source, 'gi'), rank: 'trained' },
+    { re: new RegExp(EXPERT_SENTENCE.source, 'gi'), rank: 'expert' },
+    { re: new RegExp(MASTER_SENTENCE.source, 'gi'), rank: 'master' },
+  ]
+  for (const { re, rank } of skillSentencePasses) {
+    let match: RegExpExecArray | null
+    while ((match = re.exec(description)) !== null) {
+      effects.push(
+        ...effectsFromSkillFragment(
+          match[1] ?? '',
+          replaceIfTrained,
+          choiceSeq,
+          rank,
+          rank === 'trained' ? bumpIfAlready : false,
+        ),
+      )
+    }
+  }
+
+  const rankUpRe =
+    /(?:your )?proficiency rank in\s+([^.]{2,80}?)\s+increases to (trained|expert|master|legendary)|(?:a )?sua profici[eê]ncia em\s+([^.]{2,80}?)\s+sobe para (treinado|perito|mestre|lend[aá]rio)/gi
+  let rankUp: RegExpExecArray | null
+  while ((rankUp = rankUpRe.exec(description)) !== null) {
+    const fragment = rankUp[1] || rankUp[3] || ''
+    const rank = rankFromWord(rankUp[2] || rankUp[4] || '')
+    if (!rank || WEAPON_OR_SPELL.test(fragment)) continue
     effects.push(
-      ...effectsFromSkillFragment(fragment, replaceIfTrained, choiceSeq),
+      ...effectsFromSkillFragment(fragment, false, choiceSeq, rank, false),
     )
   }
+
+  effects.push(...parseSavePerceptionRanks(description))
 
   const loreRe =
     /Additional Lore(?: general)? feat for(?: either)? ([^.]+)/gi
@@ -579,19 +693,97 @@ export function inferMulticlassGrantedFeatChoice(
   }
 }
 
+function loreKey(name: string): string {
+  return name.toLowerCase().replace(/\s*\(.*$/, '').trim()
+}
+
+function parsedEffectIsRedundant(
+  parsed: FeatEffect,
+  existing: FeatEffect[],
+): boolean {
+  if (parsed.kind === 'skillRank') {
+    return existing.some(
+      (effect) =>
+        (effect.kind === 'skillRank' && effect.skillId === parsed.skillId) ||
+        (effect.kind === 'skillRankChoice' &&
+          (effect.skillOptions?.includes(parsed.skillId) ?? false)),
+    )
+  }
+  if (parsed.kind === 'skillRankChoice') {
+    return existing.some(
+      (effect) =>
+        effect.kind === 'skillRankChoice' ||
+        (effect.kind === 'skillRank' &&
+          parsed.skillOptions?.includes(effect.skillId)),
+    )
+  }
+  if (parsed.kind === 'lore') {
+    const key = loreKey(parsed.loreName)
+    return existing.some(
+      (effect) => effect.kind === 'lore' && loreKey(effect.loreName) === key,
+    )
+  }
+  if (parsed.kind === 'saveRank') {
+    return existing.some(
+      (effect) => effect.kind === 'saveRank' && effect.save === parsed.save,
+    )
+  }
+  return existing.some((effect) => effect.kind === parsed.kind)
+}
+
+function inferArchetypeSpellcastingTier(
+  feat: Feat,
+): Extract<FeatEffect, { kind: 'spellcastingTier' }> | null {
+  if (feat.category !== 'archetype' || !feat.archetypeId) return null
+  const blob = `${feat.originalName}\n${feat.name}\n${feat.description}`
+  const original = feat.originalName
+  let tier: 'basic' | 'expert' | 'master' | null = null
+  if (
+    /master spellcasting|conjura[cç][aã]o magistral/i.test(blob) &&
+    !/basic|expert|b[aá]sica|experiente/i.test(original)
+  ) {
+    tier = 'master'
+  } else if (
+    /expert spellcasting|conjura[cç][aã]o experiente/i.test(blob) &&
+    !/basic|b[aá]sica/i.test(original)
+  ) {
+    tier = 'expert'
+  } else if (
+    /basic spellcasting|conjura[cç][aã]o b[aá]sica|benef[ií]cios de conjura[cç][aã]o b[aá]sica/i.test(
+      blob,
+    )
+  ) {
+    tier = 'basic'
+  }
+  if (!tier) return null
+  const slug = feat.archetypeId.replace(/^archetype-/, '')
+  return {
+    kind: 'spellcastingTier',
+    sourceId: `spellcasting-${slug}-archetype`,
+    tier,
+  }
+}
+
 export function effectsForFeat(feat: Feat): FeatEffect[] {
   const explicit = feat.effects ?? []
   const parsed = parseFeatDescriptionEffects(feat)
-  const seenKinds = new Set(explicit.map((effect) => effect.kind))
   const base = [
     ...explicit,
-    ...parsed.filter((effect) => !seenKinds.has(effect.kind)),
+    ...parsed.filter((effect) => !parsedEffectIsRedundant(effect, explicit)),
   ]
-  const inferred = inferMulticlassGrantedFeatChoice(feat)
-  if (inferred && !base.some((effect) => effect.kind === 'grantedFeatChoice')) {
-    return [...base, inferred]
+  const inferredFeat = inferMulticlassGrantedFeatChoice(feat)
+  const withFeat =
+    inferredFeat && !base.some((effect) => effect.kind === 'grantedFeatChoice')
+      ? [...base, inferredFeat]
+      : base
+  const inferredSpell = inferArchetypeSpellcastingTier(feat)
+  if (
+    inferredSpell &&
+    !withFeat.some((effect) => effect.kind === 'spellcastingTier')
+  ) {
+    return [...withFeat, inferredSpell]
   }
-  return base
+  return withFeat
 }
 
 export function isKnownSkillId(value: string): value is SkillId {

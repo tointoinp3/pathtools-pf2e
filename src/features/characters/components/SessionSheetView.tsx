@@ -1050,7 +1050,7 @@ function SessionMagic({
 
 type SessionSpellKind = 'Preparada' | 'Truque' | 'Repertório' | 'Foco' | 'Ritual'
 
-interface SessionSpellEntry {
+export interface SessionSpellEntry {
   key: string
   label: string
   kind: SessionSpellKind
@@ -1084,7 +1084,8 @@ function groupSessionSpells(
   return [...byLabel.values()].sort((a, b) => a.sort - b.sort)
 }
 
-function collectSessionSpells(
+/** Magias da sessão (preparadas, truques, repertório, foco, rituais). */
+export function collectSessionSpells(
   character: Character,
   access: ResolvedSpellcastingAccess,
 ): SessionSpellEntry[] {

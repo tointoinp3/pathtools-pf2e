@@ -1,19 +1,16 @@
 import { localizeTraitLabel } from '@/data/i18n/traitLabelsPt'
+import {
+  canonTraitKey,
+  formatListedMeters,
+  toEnglishTraitKey,
+} from '@/data/i18n/traitKey'
 import { formatSpeedMeters } from '@/utils/labels'
 
 const VERSATILE_DAMAGE: Record<string, string> = {
   b: 'concussão',
+  c: 'concussão',
   p: 'perfurante',
   s: 'cortante',
-}
-
-function canon(raw: string): string {
-  return raw
-    .trim()
-    .replace(/[_]+/g, ' ')
-    .replace(/-/g, ' ')
-    .replace(/\s+/g, ' ')
-    .toLowerCase()
 }
 
 function feetFrom(match: string | undefined): number | null {
@@ -136,6 +133,12 @@ const TRAIT_GLOSSARY_PT: Record<string, string> = {
     'Usa um pente. Dispara até o pente acabar; trocar o pente é Interagir (em geral Recarregar 1).',
   cobbled:
     'Improvisada ou mal-acabada. Em acerto crítico, a arma pode quebrar (o Mestre decide).',
+  splash:
+    'Em acerto, o alvo e criaturas adjacentes sofrem o dano de respingo listado.',
+  injection:
+    'Em acerto, pode injetar um veneno ou elixir no alvo no lugar da via de aplicação normal.',
+  brutal:
+    'Usa Força no teste de ataque, mesmo à distância (em vez de Destreza).',
 }
 
 function group(match: RegExpMatchArray, index: number): string {
@@ -143,7 +146,12 @@ function group(match: RegExpMatchArray, index: number): string {
 }
 
 function describePatternedTrait(key: string): string | null {
-  let m = key.match(/^deadly (d?\d+)$/)
+  let m = key.match(/^deadly (\d+d\d+)$/)
+  if (m) {
+    return `Em acerto crítico, role ${group(m, 1)} extra de dano da arma (além de dobrar os dados normais).`
+  }
+
+  m = key.match(/^deadly (d?\d+)$/)
   if (m) {
     const rawDie = group(m, 1)
     const die = rawDie.startsWith('d') ? rawDie : `d${rawDie}`
@@ -157,6 +165,15 @@ function describePatternedTrait(key: string): string | null {
     return `Em acerto crítico, os dados de dano da arma viram ${die} e você rola um ${die} extra.`
   }
 
+  m = key.match(/^reach (\d+(?:[.,]\d+)?)\s*m$/)
+  if (m) {
+    const dist = formatListedMeters(group(m, 1))
+    if (group(m, 1) === '0') {
+      return 'O Golpe tem alcance 0 m: só atinge criaturas no mesmo espaço.'
+    }
+    return `O Golpe atinge a até ${dist}, não só o adjacente.`
+  }
+
   m = key.match(/^reach(?: (\d+)(?: feet| ft)?)?$/)
   if (m) {
     const feet = feetFrom(m[1])
@@ -167,6 +184,11 @@ function describePatternedTrait(key: string): string | null {
     return `O Golpe atinge a até ${dist}, não só o adjacente.`
   }
 
+  m = key.match(/^thrown (\d+(?:[.,]\d+)?)\s*m$/)
+  if (m) {
+    return `Pode arremessar esta arma como ataque à distância. Soma Força no dano. Incremento de alcance ${formatListedMeters(group(m, 1))}.`
+  }
+
   m = key.match(/^thrown(?: (\d+)(?: feet| ft)?)?$/)
   if (m) {
     const feet = feetFrom(m[1])
@@ -175,6 +197,12 @@ function describePatternedTrait(key: string): string | null {
         ? ` Incremento de alcance ${formatSpeedMeters(feet)}.`
         : ''
     return `Pode arremessar esta arma como ataque à distância. Soma Força no dano.${range}`
+  }
+
+  m = key.match(/^range increment (\d+(?:[.,]\d+)?)\s*m$/)
+  if (m) {
+    const dist = formatListedMeters(group(m, 1))
+    return `Incremento de alcance ${dist}. Cada incremento além do primeiro impõe –2 no ataque (máximo 6 incrementos).`
   }
 
   m = key.match(/^range increment (\d+)(?: feet| ft)?$/)
@@ -192,7 +220,12 @@ function describePatternedTrait(key: string): string | null {
     return `Recarregar ${n}: gasta ${n} ação${n === 1 ? '' : 'ões'} de Interagir para recarregar antes de atacar de novo.`
   }
 
-  m = key.match(/^versatile ([bps])$/)
+  m = key.match(/^capacity (\d+)$/)
+  if (m) {
+    return `Guarda ${group(m, 1)} cargas de munição; dispara até esvaziar, depois precisa recarregar o conjunto.`
+  }
+
+  m = key.match(/^versatile ([bcps])$/)
   if (m) {
     const type = VERSATILE_DAMAGE[group(m, 1)] ?? 'alternativo'
     return `Pode causar dano de ${type} em vez do tipo normal. Escolha ao fazer o ataque.`
@@ -201,6 +234,11 @@ function describePatternedTrait(key: string): string | null {
   m = key.match(/^two hand (?:d)?(\d+)$/)
   if (m) {
     return `Pode empunhar com as duas mãos para causar d${group(m, 1)} de dano.`
+  }
+
+  m = key.match(/^volley (\d+(?:[.,]\d+)?)\s*m$/)
+  if (m) {
+    return `–2 no ataque contra alvos a ${formatListedMeters(group(m, 1))} ou menos.`
   }
 
   m = key.match(/^volley (\d+)(?: feet| ft)?$/)
@@ -215,6 +253,11 @@ function describePatternedTrait(key: string): string | null {
     return `Se você se moveu pelo menos 3 m no turno em que ataca (em geral montado), some ${die} no dano.`
   }
 
+  m = key.match(/^scatter (\d+(?:[.,]\d+)?)\s*m$/)
+  if (m) {
+    return `Em acerto, criaturas a até ${formatListedMeters(group(m, 1))} do alvo também sofrem dano de respingo.`
+  }
+
   m = key.match(/^scatter (\d+)(?: feet| ft)?$/)
   if (m) {
     return `Em acerto, criaturas a até ${formatSpeedMeters(Number(group(m, 1)))} do alvo também sofrem dano de respingo.`
@@ -225,7 +268,7 @@ function describePatternedTrait(key: string): string | null {
 
 /** Texto de regra do traço, ou `null` se ainda não houver glossário. */
 export function describeTrait(raw: string): string | null {
-  const key = canon(raw)
+  const key = toEnglishTraitKey(raw)
   if (!key) return null
   return describePatternedTrait(key) ?? TRAIT_GLOSSARY_PT[key] ?? null
 }
@@ -233,7 +276,9 @@ export function describeTrait(raw: string): string | null {
 /** Nome original (inglês) para o subtítulo do tooltip, se for diferente do rótulo. */
 export function traitOriginalLabel(raw: string): string | null {
   const label = localizeTraitLabel(raw)
+  const english = toEnglishTraitKey(raw)
+  if (!english || english === label.toLowerCase()) return null
   const pretty = raw.trim().replace(/-/g, ' ')
-  if (pretty.toLowerCase() === label.toLowerCase()) return null
-  return pretty
+  if (canonTraitKey(raw) === english) return pretty
+  return english
 }

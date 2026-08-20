@@ -139,6 +139,16 @@ const NewEncounterPage = lazy(() =>
     default: m.NewEncounterPage,
   })),
 )
+const CombatListPage = lazy(() =>
+  import('@/pages/CombatListPage').then((m) => ({
+    default: m.CombatListPage,
+  })),
+)
+const CombatTrackerPage = lazy(() =>
+  import('@/pages/CombatTrackerPage').then((m) => ({
+    default: m.CombatTrackerPage,
+  })),
+)
 
 function RouteFallback() {
   return <div className="p-4 text-sm text-text-muted">Carregando…</div>
@@ -375,12 +385,25 @@ export function AppRouter() {
           }
         />
         <Route
-          path="em-breve/combate"
+          path="combate"
           element={
             <Suspense fallback={<RouteFallback />}>
-              <ComingSoonPage title="Combate" />
+              <CombatListPage />
             </Suspense>
           }
+        />
+        <Route
+          path="combate/:id"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <CombatTrackerPage />
+            </Suspense>
+          }
+        />
+        {/* Abas antigas salvas antes da aba Combate existir */}
+        <Route
+          path="em-breve/combate"
+          element={<Navigate to="/combate" replace />}
         />
         <Route
           path="em-breve/mundo"

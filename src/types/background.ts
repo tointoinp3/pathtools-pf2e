@@ -66,7 +66,13 @@ export interface FeatGrantRule {
   /** Nome exibido (até o compêndio existir) */
   featName: string
   originalName?: string
-  featType?: 'skill' | 'general' | 'class' | 'ancestry' | 'other'
+  featType?:
+    | 'skill'
+    | 'general'
+    | 'class'
+    | 'ancestry'
+    | 'archetype'
+    | 'other'
   /** Texto de regras quando o benefício não é um feito do catálogo (magia inata, sentido…). */
   description?: string
   actionType?: 'passive' | 'free' | 'reaction' | 'one' | 'two' | 'three'

@@ -18,6 +18,8 @@ import {
   type Creature,
   type LootHaul,
   type EncounterPlan,
+  type CombatSession,
+  type TokenImageRecord,
   type CharacterGroup,
   type SharedStash,
   type SeededTable,
@@ -26,7 +28,7 @@ import Dexie, { type EntityTable } from 'dexie'
 import { nowIso } from '@/utils/id'
 
 /** Bump when official seed content must be refreshed/upserted */
-export const CURRENT_SEED_VERSION = 147
+export const CURRENT_SEED_VERSION = 148
 
 export class PathfinderDB extends Dexie {
   characters!: EntityTable<Character, 'id'>
@@ -47,6 +49,8 @@ export class PathfinderDB extends Dexie {
   settings!: EntityTable<AppSettings, 'id'>
   lootHauls!: EntityTable<LootHaul, 'id'>
   encounters!: EntityTable<EncounterPlan, 'id'>
+  combatSessions!: EntityTable<CombatSession, 'id'>
+  tokenImages!: EntityTable<TokenImageRecord, 'id'>
   characterGroups!: EntityTable<CharacterGroup, 'id'>
   sharedStashes!: EntityTable<SharedStash, 'id'>
 
@@ -300,6 +304,36 @@ export class PathfinderDB extends Dexie {
       settings: 'id',
       lootHauls: 'id, name, updatedAt, partyLevel',
       encounters: 'id, name, updatedAt, partyLevel',
+      characterGroups: 'id, name, updatedAt',
+      sharedStashes: 'id, name, groupId, updatedAt',
+    })
+
+    this.version(14).stores({
+      characters:
+        'id, name, updatedAt, backgroundId, ancestryId, heritageId, classId, groupId',
+      portraits: 'id, characterId, updatedAt',
+      backgrounds: 'id, name, rarity, provenance.type, sourceId, updatedAt',
+      ancestries: 'id, name, rarity, provenance.type, sourceId, updatedAt',
+      heritages:
+        'id, name, ancestryId, rarity, provenance.type, sourceId, updatedAt',
+      classes: 'id, name, rarity, provenance.type, sourceId, updatedAt',
+      feats:
+        'id, name, level, category, ancestryId, classId, heritageId, archetypeId, rarity, provenance.type, sourceId, updatedAt',
+      archetypes: 'id, name, kind, rarity, provenance.type, sourceId, updatedAt',
+      companionTypes:
+        'id, catalogKind, name, provenance.type, sourceId, updatedAt',
+      itemDefinitions:
+        'id, category, name, rarity, provenance.type, sourceId, updatedAt',
+      spells: 'id, name, rank, rarity, provenance.type, sourceId, updatedAt',
+      rituals: 'id, name, rank, rarity, provenance.type, sourceId, updatedAt',
+      deities: 'id, name, kind, rarity, provenance.type, sourceId, updatedAt',
+      creatures: 'id, name, level, rarity, provenance.type, sourceId, updatedAt',
+      contentSources: 'id, name, type',
+      settings: 'id',
+      lootHauls: 'id, name, updatedAt, partyLevel',
+      encounters: 'id, name, updatedAt, partyLevel',
+      combatSessions: 'id, name, updatedAt',
+      tokenImages: 'id, scope, ownerId',
       characterGroups: 'id, name, updatedAt',
       sharedStashes: 'id, name, groupId, updatedAt',
     })

@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+import { navItemIsActive } from '@/components/layout/sidebarNav'
 import { ThemePicker } from '@/features/settings/ThemePicker'
 import {
   useWorkspaceStore,
@@ -32,8 +33,19 @@ const BESTIARY_COMPENDIUM_PATHS = new Set([
   '/compendio/homebrew',
 ])
 
+const COMBAT_COMPENDIUM_PATHS = new Set([
+  '/compendio/equipamento',
+  '/compendio/guias',
+  '/compendio/homebrew',
+])
+
+const COMBAT_TOOL: NavItem = {
+  to: '/combate',
+  label: 'Combate',
+  hint: 'Grid com fichas, PV e iniciativa',
+}
+
 const SOON_TOOLS: NavItem[] = [
-  { to: '/em-breve/combate', label: 'Combate', soon: true },
   { to: '/em-breve/mundo', label: 'Mundo', soon: true },
 ]
 
@@ -56,9 +68,13 @@ const BESTIARY_TOOL: NavItem = {
 }
 
 function toolsFor(mode: WorkspaceMode): NavItem[] {
-  if (mode === 'character') return [SAQUE_TOOL, BESTIARY_TOOL, ...SOON_TOOLS]
-  if (mode === 'loot') return [PERSONAGEM_TOOL, BESTIARY_TOOL, ...SOON_TOOLS]
-  return [PERSONAGEM_TOOL, SAQUE_TOOL, ...SOON_TOOLS]
+  if (mode === 'character')
+    return [SAQUE_TOOL, BESTIARY_TOOL, COMBAT_TOOL, ...SOON_TOOLS]
+  if (mode === 'loot')
+    return [PERSONAGEM_TOOL, BESTIARY_TOOL, COMBAT_TOOL, ...SOON_TOOLS]
+  if (mode === 'combat')
+    return [PERSONAGEM_TOOL, SAQUE_TOOL, BESTIARY_TOOL, ...SOON_TOOLS]
+  return [PERSONAGEM_TOOL, SAQUE_TOOL, COMBAT_TOOL, ...SOON_TOOLS]
 }
 
 function primarySection(mode: WorkspaceMode): NavSection {
@@ -80,6 +96,23 @@ function primarySection(mode: WorkspaceMode): NavSection {
           to: '/saques/mesa',
           label: 'Inventário da mesa',
           hint: 'Fichas, baú compartilhado e trocas',
+        },
+      ],
+    }
+  }
+  if (mode === 'combat') {
+    return {
+      title: 'Combate',
+      items: [
+        {
+          to: '/combate/grid',
+          label: 'Grid',
+          hint: 'Abrir o tabuleiro mais recente',
+        },
+        {
+          to: '/combate',
+          label: 'Meus Combates',
+          hint: 'Combates salvos neste dispositivo',
         },
       ],
     }
@@ -209,7 +242,11 @@ function buildSections(mode: WorkspaceMode): NavSection[] {
         ? compendiumItems.filter((item) =>
             BESTIARY_COMPENDIUM_PATHS.has(item.to),
           )
-        : compendiumItems
+        : mode === 'combat'
+          ? compendiumItems.filter((item) =>
+              COMBAT_COMPENDIUM_PATHS.has(item.to),
+            )
+          : compendiumItems
 
   return [
     primarySection(mode),
@@ -225,17 +262,49 @@ function buildSections(mode: WorkspaceMode): NavSection[] {
 function modeTagline(mode: WorkspaceMode): string {
   if (mode === 'loot') return 'Pathfinder 2e Remaster · gerador de saque'
   if (mode === 'bestiary') return 'Pathfinder 2e Remaster · bestiário'
+  if (mode === 'combat') return 'Pathfinder 2e Remaster · combate'
   return 'Pathfinder 2e Remaster · ficha local'
 }
 
 function modeFooter(mode: WorkspaceMode): string {
   if (mode === 'loot') return 'Equipamento · Kits · Saque'
   if (mode === 'bestiary') return 'Criaturas · Encontros · Equipamento'
+  if (mode === 'combat') return 'Grid · Iniciativa · Baús'
   return 'Ancestralidades · Classes · Origens · Homebrew'
+}
+
+function SidebarLink({
+  item,
+  location,
+}: {
+  item: NavItem
+  location: { pathname: string; search: string }
+}) {
+  const active = navItemIsActive(item.to, location)
+  return (
+    <Link
+      to={item.to}
+      title={item.hint}
+      aria-current={active ? 'page' : undefined}
+      className={`nav-link-item block rounded-lg px-2.5 py-2 text-sm ${
+        active
+          ? 'bg-info/15 text-info shadow-[inset_3px_0_0_0_var(--color-info)]'
+          : 'text-text-muted hover:bg-surface-2 hover:text-text'
+      }`}
+    >
+      <span className="font-medium">{item.label}</span>
+      {item.hint && (
+        <span className="mt-0.5 block text-[10px] text-text-dim">
+          {item.hint}
+        </span>
+      )}
+    </Link>
+  )
 }
 
 export function Sidebar() {
   const mode = useWorkspaceStore((s) => s.mode)
+  const location = useLocation()
   const sections = buildSections(mode)
 
   return (
@@ -269,30 +338,7 @@ export function Sidebar() {
                       </span>
                     </div>
                   ) : (
-                    <NavLink
-                      to={item.to}
-                      title={item.hint}
-                      end={
-                        item.to === '/saques' ||
-                        item.to === '/personagens' ||
-                        item.to === '/bestiario' ||
-                        item.to === '/bestiario/encontros'
-                      }
-                      className={({ isActive }) =>
-                        `nav-link-item block rounded-lg px-2.5 py-2 text-sm ${
-                          isActive
-                            ? 'bg-accent/15 text-accent shadow-[inset_3px_0_0_0_var(--color-accent)]'
-                            : 'text-text-muted hover:bg-surface-2 hover:text-text'
-                        }`
-                      }
-                    >
-                      <span className="font-medium">{item.label}</span>
-                      {item.hint && (
-                        <span className="mt-0.5 block text-[10px] text-text-dim">
-                          {item.hint}
-                        </span>
-                      )}
-                    </NavLink>
+                    <SidebarLink item={item} location={location} />
                   )}
                 </li>
               ))}

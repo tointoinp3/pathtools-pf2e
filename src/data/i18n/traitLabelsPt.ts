@@ -1,4 +1,5 @@
 import { formatSpeedMeters } from '@/utils/labels'
+import { formatListedMeters, toEnglishTraitKey } from '@/data/i18n/traitKey'
 
 /** Rótulos pt-BR para traços comuns que ainda vêm em inglês no seed. */
 export const TRAIT_LABELS_PT: Record<string, string> = {
@@ -91,6 +92,8 @@ export const TRAIT_LABELS_PT: Record<string, string> = {
   Elixir: 'Elixir',
   Mutagen: 'Mutagênico',
   Splash: 'Respingo',
+  Injection: 'Injeção',
+  Brutal: 'Brutal',
   Animist: 'Animista',
   Apparition: 'Aparição',
   Wandering: 'Errante',
@@ -411,40 +414,75 @@ export const TRAIT_LABELS_PT: Record<string, string> = {
 
 const TRAIT_PATTERN_PT: Array<[RegExp, (m: RegExpMatchArray) => string]> = [
   [
+    /^(?:arremesso|thrown) (\d+(?:[.,]\d+)?)\s*m$/i,
+    (m) => `Arremesso ${formatListedMeters(m[1]!)}`,
+  ],
+  [
     /^Thrown (\d+)\s*(?:feet|ft\.?)$/i,
     (m) => `Arremesso ${formatSpeedMeters(Number(m[1]))}`,
+  ],
+  [
+    /^(?:alcance|reach) (\d+(?:[.,]\d+)?)\s*m$/i,
+    (m) => `Alcance ${formatListedMeters(m[1]!)}`,
   ],
   [
     /^reach (\d+)\s*(?:feet|ft\.?)$/i,
     (m) => `Alcance ${formatSpeedMeters(Number(m[1]))}`,
   ],
   [
+    /^(?:incremento(?: de (?:alcance|distância))?|range increment) (\d+(?:[.,]\d+)?)\s*m$/i,
+    (m) => `Incremento ${formatListedMeters(m[1]!)}`,
+  ],
+  [
     /^range increment (\d+)\s*(?:feet|ft\.?)$/i,
     (m) => `Incremento ${formatSpeedMeters(Number(m[1]))}`,
   ],
-  [/^Reload (\d+)$/i, (m) => `Recarregar ${m[1]}`],
-  [/^Two-Hand (.+)$/i, (m) => `Duas mãos ${m[1]}`],
+  [/^(?:recarga|recarregar|reload) (\d+)$/i, (m) => `Recarregar ${m[1]}`],
+  [/^Two[ -]?Hand (.+)$/i, (m) => `Duas mãos ${m[1]}`],
   [/^Fatal Aim$/i, () => 'Mira fatal'],
   [/^Fatal (.+)$/i, (m) => `Fatal ${m[1]}`],
-  [/^Deadly (.+)$/i, (m) => `Mortal ${m[1]}`],
-  [/^Versatile (.+)$/i, (m) => `Versátil ${m[1]}`],
+  [/^(?:Deadly|Mortal) (.+)$/i, (m) => `Mortal ${m[1]}`],
+  [/^(?:Versatile|Versátil) (.+)$/i, (m) => `Versátil ${m[1]}`],
+  [
+    /^(?:rajada|saraivada|volley) (\d+(?:[.,]\d+)?)\s*m$/i,
+    (m) => `Saraivada ${formatListedMeters(m[1]!)}`,
+  ],
   [/^Volley (\d+)\s*ft\.?$/i, (m) => `Saraivada ${formatSpeedMeters(Number(m[1]))}`],
   [/^Volley (\d+)$/i, (m) => `Saraivada ${formatSpeedMeters(Number(m[1]))}`],
+  [
+    /^(?:espalhamento|scatter) (\d+(?:[.,]\d+)?)\s*m$/i,
+    (m) => `Espalhamento ${formatListedMeters(m[1]!)}`,
+  ],
   [/^Scatter (\d+)\s*ft\.?$/i, (m) => `Espalhamento ${formatSpeedMeters(Number(m[1]))}`],
   [/^Jousting (.+)$/i, (m) => `Justa ${m[1]}`],
   [/^Attached to Shield$/i, () => 'Acoplado a escudo'],
   [/^Ranged Trip$/i, () => 'Derrubar à distância'],
-  [/^Free-Hand$/i, () => 'Mão livre'],
+  [/^Free[ -]?Hand$/i, () => 'Mão livre'],
   [/^Critical Fusion$/i, () => 'Fusão crítica'],
+  [/^(?:capacidade|capacity)[ -]?(\d+)$/i, (m) => `Capacidade ${m[1]}`],
 ]
+
+function applyTraitPatterns(value: string): string | null {
+  for (const [re, fmt] of TRAIT_PATTERN_PT) {
+    const m = value.match(re)
+    if (m) return fmt(m)
+  }
+  return null
+}
 
 export function localizeTraitLabel(trait: string): string {
   if (TRAIT_LABELS_PT[trait]) return TRAIT_LABELS_PT[trait]
   const titled = trait.slice(0, 1).toUpperCase() + trait.slice(1)
   if (TRAIT_LABELS_PT[titled]) return TRAIT_LABELS_PT[titled]
-  for (const [re, fmt] of TRAIT_PATTERN_PT) {
-    const m = trait.match(re)
-    if (m) return fmt(m)
+  const fromRaw = applyTraitPatterns(trait)
+  if (fromRaw) return fromRaw
+
+  const english = toEnglishTraitKey(trait)
+  if (english) {
+    const enDisplay = english.charAt(0).toUpperCase() + english.slice(1)
+    if (TRAIT_LABELS_PT[enDisplay]) return TRAIT_LABELS_PT[enDisplay]
+    const fromEnglish = applyTraitPatterns(enDisplay) ?? applyTraitPatterns(english)
+    if (fromEnglish) return fromEnglish
   }
   return trait
 }

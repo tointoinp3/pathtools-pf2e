@@ -1,11 +1,12 @@
 import { create } from 'zustand'
 
-export type WorkspaceMode = 'character' | 'loot' | 'bestiary'
+export type WorkspaceMode = 'character' | 'loot' | 'bestiary' | 'combat'
 
 const STORAGE_KEY = 'sp-workspace-mode'
 
 function parseMode(value: string | null): WorkspaceMode {
-  if (value === 'loot' || value === 'bestiary') return value
+  if (value === 'loot' || value === 'bestiary' || value === 'combat')
+    return value
   return 'character'
 }
 
@@ -29,6 +30,7 @@ function modeFromPath(pathname: string): WorkspaceMode | null {
   if (pathname.startsWith('/saques')) return 'loot'
   if (pathname.startsWith('/bestiario')) return 'bestiary'
   if (pathname.startsWith('/personagens')) return 'character'
+  if (pathname.startsWith('/combate')) return 'combat'
   return null
 }
 

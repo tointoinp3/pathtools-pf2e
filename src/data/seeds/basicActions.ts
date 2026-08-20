@@ -1,17 +1,19 @@
 import type { CombatAction } from '@/types/action'
+import { CATALOG_ACTIONS } from '@/data/seeds/catalogActions'
 
 /**
  * Ações básicas e especiais — Player Core (Remaster).
  * Referência: https://2e.aonprd.com/Actions.aspx
  * Textos em pt-BR para uso rápido na mesa.
  */
-export const BASIC_ACTIONS: CombatAction[] = [
+export const CORE_ACTIONS: CombatAction[] = [
   {
     id: 'action-aid',
     name: 'Auxiliar',
     originalName: 'Aid',
     actionType: 'reaction',
     category: 'basic',
+    group: 'other',
     traits: [],
     trigger:
       'Um aliado está prestes a usar uma ação que exige teste de perícia ou ataque.',
@@ -27,6 +29,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Crawl',
     actionType: 'one',
     category: 'basic',
+    group: 'movement',
     traits: ['movimento'],
     requirements:
       'Você está caído e sua Velocidade é pelo menos 3 m.',
@@ -39,6 +42,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Delay',
     actionType: 'free',
     category: 'basic',
+    group: 'conflict',
     traits: [],
     trigger: 'Seu turno começa.',
     description:
@@ -51,6 +55,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Drop Prone',
     actionType: 'one',
     category: 'basic',
+    group: 'movement',
     traits: ['movimento'],
     description: 'Você fica caído.',
     source: 'Player Core pg. 416',
@@ -61,6 +66,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Escape',
     actionType: 'one',
     category: 'basic',
+    group: 'attack',
     traits: ['ataque'],
     description:
       'Tente se libertar de agarrado, imobilizado ou contido. Escolha a fonte da condição e faça um teste com o modificador de ataque desarmado contra a CD do efeito (Atletismo de quem agarra, Ladroagem se amarrado, CD de magia etc.). Pode usar Acrobacia ou Atletismo no lugar (ainda com o traço ataque). Sucesso crítico: livre + Avançar até 1,5 m. Sucesso: livre. Falha crítica: não escapa e não tenta de novo até o próximo turno.',
@@ -72,6 +78,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Interact',
     actionType: 'one',
     category: 'basic',
+    group: 'objects',
     traits: ['manipulação'],
     description:
       'Usa a(s) mão(s) para manipular objeto ou terreno: pegar item, sacar arma, trocar item em mãos, abrir porta ou efeito similar. Em casos raros o mestre pode pedir um teste de perícia.',
@@ -83,6 +90,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Leap',
     actionType: 'one',
     category: 'basic',
+    group: 'movement',
     traits: ['movimento'],
     description:
       'Salto curto. Horizontal: até 3 m se Velocidade ≥ 4,5 m, ou até 4,5 m se Velocidade ≥ 9 m (não pode se Velocidade < 4,5 m). Vertical: até ~90 cm para cima e 1,5 m na horizontal até uma superfície elevada. Distâncias maiores usam Atletismo (Salto Alto / Salto Longo).',
@@ -94,6 +102,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Ready',
     actionType: 'two',
     category: 'basic',
+    group: 'conflict',
     traits: ['concentração'],
     description:
       'Prepara uma ação ou ação livre (sem gatilho próprio) para fora do seu turno. Escolha a ação e um gatilho; seu turno termina. Se o gatilho ocorrer antes do próximo turno, usa a ação como reação (se ainda cumprir requisitos). Ataque preparado usa o MAP que você tinha ao Preparar.',
@@ -105,6 +114,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Release',
     actionType: 'free',
     category: 'basic',
+    group: 'objects',
     traits: ['manipulação'],
     description:
       'Solta algo na(s) mão(s): largar item, tirar uma mão da arma, soltar corda etc. Diferente da maioria das ações de manipulação, Soltar não dispara reações que reagem a manipulação (ex.: Golpe Reativo). Fora do turno, use Preparar.',
@@ -116,6 +126,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Seek',
     actionType: 'one',
     category: 'basic',
+    group: 'stealth',
     traits: ['concentração', 'segredo'],
     description:
       'Varre uma área em busca de criaturas, objetos, portas secretas ou perigos. O mestre define a área (quase sempre ≤ 9 m) e faz um teste secreto de Percepção contra CDs de Furtividade / detectar objetos. Sucesso crítico: criatura escondida ou indetectável vira observada; localiza objetos. Sucesso: indetectável vira escondida; escondida vira observada; pista do objeto.',
@@ -127,6 +138,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Sense Motive',
     actionType: 'one',
     category: 'basic',
+    group: 'stealth',
     traits: ['concentração', 'segredo'],
     description:
       'Avalia se o comportamento de uma criatura é anormal. O mestre faz Percepção secreta vs CD de Enganação, CD de magia mental ou similar. Em geral não pode tentar de novo na mesma criatura até a situação mudar. Sucesso crítico: intenções verdadeiras e ideia de magia mental. Sucesso: sabe se está normal, sem detalhes. Falha: acredita no que o enganador quer. Falha crítica: leitura falsa.',
@@ -138,6 +150,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Stand',
     actionType: 'one',
     category: 'basic',
+    group: 'movement',
     traits: ['movimento'],
     description: 'Você se levanta e deixa de estar caído.',
     source: 'Player Core pg. 418',
@@ -148,6 +161,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Step',
     actionType: 'one',
     category: 'basic',
+    group: 'movement',
     traits: ['movimento'],
     requirements: 'Sua Velocidade é pelo menos 3 m.',
     description:
@@ -160,6 +174,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Stride',
     actionType: 'one',
     category: 'basic',
+    group: 'movement',
     traits: ['movimento'],
     description: 'Você se move até sua Velocidade.',
     source: 'Player Core pg. 418',
@@ -170,6 +185,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Strike',
     actionType: 'one',
     category: 'basic',
+    group: 'attack',
     traits: ['ataque'],
     description:
       'Ataca com arma empunhada ou ataque desarmado contra uma criatura no alcance (corpo a corpo) ou alcance (à distância). Role o ataque e compare com a CA. Sucesso crítico: dano dobrado. Sucesso: dano normal. O dano usa o dado da arma/ataque + modificadores.',
@@ -181,6 +197,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Take Cover',
     actionType: 'one',
     category: 'basic',
+    group: 'defense',
     traits: [],
     requirements:
       'Você tem cobertura padrão, está perto de algo que permita cobrir-se, ou está caído.',
@@ -196,6 +213,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Activate an Item',
     actionType: 'variable',
     category: 'specialty',
+    group: 'objects',
     traits: [],
     requirements:
       'Item com traço investido só se estiver investido por você. Se precisar Interagir, empunhe ou toque com mão livre.',
@@ -209,6 +227,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Arrest a Fall',
     actionType: 'reaction',
     category: 'specialty',
+    group: 'movement',
     traits: [],
     trigger: 'Você está caindo.',
     requirements: 'Você tem Velocidade de voo.',
@@ -222,6 +241,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Avert Gaze',
     actionType: 'one',
     category: 'specialty',
+    group: 'defense',
     traits: [],
     description:
       'Desvia o olhar de perigos como o olhar de uma medusa. +2 de circunstância em salvaguardas contra habilidades visuais que exigem olhar a uma criatura/objeto. Permanece até o início do próximo turno.',
@@ -233,6 +253,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Burrow',
     actionType: 'one',
     category: 'specialty',
+    group: 'movement',
     traits: ['movimento'],
     requirements: 'Você tem Velocidade de escavação.',
     description:
@@ -245,6 +266,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Cast a Spell',
     actionType: 'variable',
     category: 'specialty',
+    group: 'magic',
     traits: [],
     description:
       'O custo em ações varia conforme o bloco da magia. Truques, magias de espaço e de foco usam o mesmo processo; gaste o espaço ou 1 Ponto de Foco conforme o caso. Qualquer magia conta como atividade Conjurar uma Magia.',
@@ -256,6 +278,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Dismiss',
     actionType: 'one',
     category: 'specialty',
+    group: 'magic',
     traits: ['concentração'],
     description:
       'Encerra um efeito que diga que você pode Dispensar. Em geral termina o efeito inteiro, salvo indicação em contrário.',
@@ -267,6 +290,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Fly',
     actionType: 'one',
     category: 'specialty',
+    group: 'movement',
     traits: ['movimento'],
     requirements: 'Você tem Velocidade de voo.',
     description:
@@ -279,6 +303,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Grab an Edge',
     actionType: 'reaction',
     category: 'specialty',
+    group: 'movement',
     traits: ['manipulação'],
     trigger: 'Você cai de ou passa por uma borda ou apoio.',
     requirements: 'Mãos não amarradas atrás das costas nem de outro modo restringidas.',
@@ -292,6 +317,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Invest an Item',
     actionType: 'variable',
     category: 'specialty',
+    group: 'objects',
     traits: [],
     description:
       'Itens mágicos com traço investido só concedem benefícios constantes após investidos (até 10 por dia). A investidura dura até remover o item; o item ainda conta no limite do dia. Reinicia nas preparações diárias.',
@@ -303,6 +329,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Mount',
     actionType: 'one',
     category: 'specialty',
+    group: 'other',
     traits: ['movimento'],
     requirements:
       'Adjacente a uma criatura pelo menos um tamanho maior e disposta a ser montaria.',
@@ -316,6 +343,7 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Point Out',
     actionType: 'one',
     category: 'specialty',
+    group: 'stealth',
     traits: ['auditivo', 'manipulação', 'visual'],
     requirements:
       'Uma criatura está indetectável para um ou mais aliados, mas não para você.',
@@ -329,10 +357,11 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Raise a Shield',
     actionType: 'one',
     category: 'specialty',
+    group: 'defense',
     traits: [],
     requirements: 'Você está empunhando um escudo.',
     description:
-      'Posiciona o escudo. Ganha o bônus de circunstância à CA listado no escudo. Permanece erguido até o início do próximo turno.',
+      'Posiciona o escudo. Ganha o bônus de circunstância à CA listado no escudo. Permanece erguido até o início do próximo turno. Armas com o traço Aparar usam a mesma ação: em geral +1 de circunstância à CA enquanto a arma está aparando.',
     source: 'Player Core pg. 419',
   },
   {
@@ -341,9 +370,13 @@ export const BASIC_ACTIONS: CombatAction[] = [
     originalName: 'Sustain',
     actionType: 'one',
     category: 'specialty',
+    group: 'magic',
     traits: ['concentração'],
     description:
       'Escolha um efeito com duração sustentada ou benefício ao Sustentar. Se tiver duração sustentada, estende até o fim do próximo turno (sustentar mais de uma vez no mesmo turno não estende além). Sem limite listado: até 10 minutos. Pode haver benefício extra. Se a ação for interrompida, o efeito termina.',
     source: 'Player Core pg. 419',
   },
 ]
+
+/** Básicas, perícias, exploração e intervalo — tudo em pt-BR para a aba Combate. */
+export const BASIC_ACTIONS: CombatAction[] = [...CORE_ACTIONS, ...CATALOG_ACTIONS]

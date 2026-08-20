@@ -958,6 +958,8 @@ export function pruneFeatSelections(
     | 'classId'
     | 'featSelections'
     | 'featChoices'
+    | 'secondClassId'
+    | 'secondClassChoices'
   >,
   feats: Feat[],
   characterClass?: CharacterClass | null,

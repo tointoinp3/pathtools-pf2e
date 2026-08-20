@@ -1182,6 +1182,11 @@ export function applyFeatEffects(input: {
             sourceLabel: feat.name,
             actionType: feat.actionType ?? 'passive',
           })
+          const option = effect.options.find((entry) => entry.id === chosen)
+          for (const nested of option?.effects ?? []) {
+            if (nested.kind === 'textChoice') continue
+            run(nested, feat, prefix)
+          }
           break
         }
         result.pendingSkillChoices.push({

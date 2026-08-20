@@ -174,6 +174,14 @@ const avengerArchetypeFeats: Feat[] = [
         description:
           'Treinado na arma predileta; ataque sorrateiro com ela; especialização crítica se crítico contra desprevenido. Treinado na perícia divina (outra perícia se já for). Pode usar Força como atributo-chave. Armadura média sobe com perícia/maestria em leve.',
       },
+      {
+        kind: 'skillRankChoice',
+        choiceId: 'avenger-divine-skill',
+        rank: 'trained',
+        skillOptions: ['religion', 'nature', 'occultism', 'arcana'],
+        replaceIfTrained: true,
+        hint: 'Perícia divina da sua divindade. Se já for treinado nela, escolha outra.',
+      },
       { kind: 'defenseRank', categories: ['medium'], rank: 'trained' },
       {
         kind: 'specialAbility',

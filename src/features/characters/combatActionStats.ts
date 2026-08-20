@@ -43,6 +43,27 @@ const BASIC_OVERRIDES: Record<string, Partial<ActionCombatHints>> = {
   'action-sense-motive': { perception: true },
   'action-arrest-fall': { skillIds: ['acrobatics'] },
   'action-grab-edge': { skillIds: ['acrobatics'] },
+  'action-feint': { skillIds: ['deception'] },
+  'action-grapple': { skillIds: ['athletics'] },
+  'action-shove': { skillIds: ['athletics'] },
+  'action-trip': { skillIds: ['athletics'] },
+  'action-disarm': { skillIds: ['athletics'] },
+  'action-demoralize': { skillIds: ['intimidation'] },
+  'action-create-diversion': { skillIds: ['deception'] },
+  'action-hide': { skillIds: ['stealth'] },
+  'action-sneak': { skillIds: ['stealth'] },
+  'action-tumble-through': { skillIds: ['acrobatics'] },
+  'action-high-jump': { skillIds: ['athletics'] },
+  'action-long-jump': { skillIds: ['athletics'] },
+  'action-swim': { skillIds: ['athletics'] },
+  'action-climb': { skillIds: ['athletics'] },
+  'action-balance': { skillIds: ['acrobatics'] },
+  'action-force-open': { skillIds: ['athletics'] },
+  'action-administer-first-aid': { skillIds: ['medicine'] },
+  'action-treat-wounds': { skillIds: ['medicine'] },
+  'action-treat-poison': { skillIds: ['medicine'] },
+  'action-battle-medicine': { skillIds: ['medicine'] },
+  'action-recall-knowledge': { skillIds: ['arcana', 'nature', 'occultism', 'religion', 'society'] },
 }
 
 function traitKeys(traits: string[] | undefined): string[] {
@@ -57,7 +78,7 @@ function mentionsSkillCheck(text: string, word: string): boolean {
       'i',
     ).test(text) ||
     new RegExp(`${w}\\s+check`, 'i').test(text) ||
-    new RegExp(`teste(?:s)?\\s+de\\s+${w}`, 'i').test(text) ||
+    new RegExp(`teste(?:s)?(?:\\s+\\w+){0,3}\\s+de\\s+${w}`, 'i').test(text) ||
     new RegExp(`check\\s+(?:with\\s+|against\\s+)?(?:the\\s+)?${w}`, 'i').test(
       text,
     )

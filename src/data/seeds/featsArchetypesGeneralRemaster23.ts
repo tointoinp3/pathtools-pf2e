@@ -1328,12 +1328,20 @@ const oatiaSkysageArchetypeFeats: Feat[] = [
         kind: 'textChoice',
         choiceId: 'oatia-skysage-study',
         options: [
-          { id: 'astronomy-lore', label: 'Treinado em Conhecimento de Astronomia' },
-          { id: 'occultism-expert', label: 'Perito em Ocultismo' },
+          {
+            id: 'astronomy-lore',
+            label: 'Treinado em Conhecimento de Astronomia',
+            effects: [{ kind: 'lore', loreName: 'Astronomia', rank: 'trained' }],
+          },
+          {
+            id: 'occultism-expert',
+            label: 'Perito em Ocultismo',
+            effects: [{ kind: 'skillRank', skillId: 'occultism', rank: 'expert' }],
+          },
         ],
-        hint: 'Astronomia ou perito em Ocultismo. O motor não escolhe.',
+        hint: 'Astronomia ou perito em Ocultismo. O motor aplica o posto depois da escolha.',
         abilityName: 'Estudo celeste: {choice}',
-        abilityDescription: 'Aplique o posto escolhido na ficha. O motor não escolhe.',
+        abilityDescription: 'Posto aplicado na ficha conforme a escolha.',
       },
       { kind: 'spellcasting', access: OATIA_SPELL },
       {

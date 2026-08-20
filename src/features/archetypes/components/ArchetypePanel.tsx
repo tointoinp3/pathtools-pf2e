@@ -297,9 +297,9 @@ function CatalogGroup({
                       ? `${ARCHETYPE_KIND_LABELS[arch.kind]} · ${
                           missing.length === 1 &&
                           /^(Pegue|Este feito|Requer|Escolha|Feito de)/i.test(
-                            missing[0],
+                            missing[0] ?? '',
                           )
-                            ? missing[0]
+                            ? (missing[0] ?? '')
                             : `falta ${missing.join(', ')}`
                         }`
                       : ARCHETYPE_KIND_LABELS[arch.kind]

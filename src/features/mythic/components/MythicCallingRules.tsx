@@ -5,7 +5,7 @@ import { Badge, RarityBadge } from '@/components/ui/Badge'
 import { ExpandableCard } from '@/components/ui/ExpandableCard'
 import { Panel } from '@/components/ui/Panel'
 import { RichText } from '@/components/ui/RichText'
-import { ActionCost } from '@/components/ui/ActionIcon'
+import { ActionCost, isPf2ActionType } from '@/components/ui/ActionIcon'
 import { polishRulesText } from '@/data/i18n/featDescriptionsPt'
 import { resolveMythicCalling } from '@/engine/mythic'
 
@@ -130,7 +130,8 @@ export function MythicPathPanel({
             title={ability.name}
             subtitle={ability.sourceLabel}
             badges={
-              ability.actionType && ability.actionType !== 'passive' ? (
+              isPf2ActionType(ability.actionType) &&
+              ability.actionType !== 'passive' ? (
                 <ActionCost type={ability.actionType} />
               ) : (
                 <Badge className="!text-[9px]">Passivo</Badge>
