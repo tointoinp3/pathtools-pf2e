@@ -354,7 +354,7 @@ export function Sidebar() {
           </div>
           <ThemePicker compact />
         </div>
-        Fundação v0.1
+        Fundação v0.2
         <br />
         {modeFooter(mode)}
       </div>
