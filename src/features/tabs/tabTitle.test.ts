@@ -9,11 +9,15 @@ describe('titleFromHref', () => {
     assert.equal(titleFromHref('/saques/mesa'), 'Inventário da mesa')
     assert.equal(titleFromHref('/bestiario/encontros'), 'Encontros')
     assert.equal(titleFromHref('/bestiario?criar=1'), 'Criar criatura')
+    assert.equal(titleFromHref('/mundo'), 'Mundo')
+    assert.equal(titleFromHref('/mundo/mapas'), 'Mapas')
   })
 
   test('fichas salvas ficam com rótulo genérico até a página informar o nome', () => {
     assert.equal(titleFromHref('/personagens/abc'), 'Personagem')
     assert.equal(titleFromHref('/saques/abc'), 'Saque')
     assert.equal(titleFromHref('/bestiario/encontros/abc'), 'Encontro')
+    assert.equal(titleFromHref('/mundo/notas/abc'), 'Nota')
+    assert.equal(titleFromHref('/mundo/mapas/abc'), 'Mapa')
   })
 })

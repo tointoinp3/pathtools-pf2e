@@ -15,6 +15,10 @@ import {
   runCombatExportAll,
   runCombatImport,
 } from '@/features/backup/combatBackup'
+import {
+  runWorldExport,
+  runWorldImport,
+} from '@/features/world/worldBackup'
 
 interface JsonExchangeButtonsProps {
   onExport: () => void | Promise<void>
@@ -98,6 +102,19 @@ export function CombatJsonButtons() {
       exportTitle="Baixa todos os combates deste dispositivo"
       onExport={() => runCombatExportAll()}
       onImport={() => runCombatImport()}
+    />
+  )
+}
+
+export function WorldJsonButtons() {
+  return (
+    <JsonExchangeButtons
+      exportLabel="Exportar mundo"
+      importLabel="Importar JSON"
+      importTitle="Notas, pastas, mapas e ícones deste dispositivo"
+      exportTitle="Baixa o worldbuilding completo (notas + mapas + imagens)"
+      onExport={() => runWorldExport()}
+      onImport={() => runWorldImport()}
     />
   )
 }

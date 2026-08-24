@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type {
   CharacterClass,
   ClassCatalogDefinition,
@@ -9,9 +9,12 @@ import { ITEM_DEFINITIONS } from '@/data/seeds/equipment'
 import { getClassCatalogs } from '@/data/seeds/catalogs'
 import {
   catalogPreparedSlotCount,
+  catalogRepertoireIds,
   effectiveCatalogSlotCount,
   getCatalogPicks,
   getCatalogPrepared,
+  toggleCatalogPick,
+  hydrateCatalogPrepared,
   visibleCatalogOptions,
 } from '@/engine/classCatalog'
 import { Badge } from '@/components/ui/Badge'
@@ -65,8 +68,8 @@ function setList(
 
 function toggleId(list: string[], id: string, unique: boolean, max: number) {
   if (list.includes(id)) return list.filter((x) => x !== id)
-  if (unique && list.length >= max) return list
-  if (!unique && list.length >= max) return list
+  if (list.length >= max) return list
+  void unique
   return [...list, id]
 }
 
@@ -151,6 +154,28 @@ function WeaponPicker({
   )
 }
 
+function StepperButton({
+  label,
+  disabled,
+  onClick,
+}: {
+  label: string
+  disabled?: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      disabled={disabled}
+      onClick={onClick}
+      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-border bg-surface-3 text-xs font-medium text-text hover:border-accent/50 disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      {label === 'Adicionar' ? '+' : '−'}
+    </button>
+  )
+}
+
 function OptionCard({
   option,
   catalog,
@@ -161,8 +186,10 @@ function OptionCard({
   disabled,
   showPrepare,
   showPrimary,
+  prepareFull,
   onToggle,
   onPrepare,
+  onRemovePrepared,
   onPrimary,
 }: {
   option: ClassCatalogOption
@@ -174,16 +201,61 @@ function OptionCard({
   disabled?: boolean
   showPrepare?: boolean
   showPrimary?: boolean
+  prepareFull?: boolean
   onToggle: () => void
   onPrepare?: () => void
+  onRemovePrepared?: () => void
   onPrimary?: () => void
 }) {
   const catLabel = option.category
     ? catalog.categoryLabels?.[option.category] ?? option.category
     : null
+  const prepareToolbar =
+    (showPrepare && onPrepare) || (showPrimary && onPrimary) ? (
+      <div className="flex flex-wrap items-center gap-1.5">
+        {showPrepare && onPrepare ? (
+          catalog.allowPreparedDuplicates ? (
+            <div className="flex items-center gap-1">
+              <StepperButton
+                label="Remover"
+                disabled={!preparedCount}
+                onClick={() => onRemovePrepared?.()}
+              />
+              <span
+                className={`min-w-[5.5rem] text-center text-[10px] font-medium ${
+                  preparedCount > 0 ? 'text-accent' : 'text-text-muted'
+                }`}
+              >
+                {preparedCount > 0
+                  ? `Hoje ×${preparedCount}`
+                  : 'Preparar hoje'}
+              </span>
+              <StepperButton
+                label="Adicionar"
+                disabled={prepareFull}
+                onClick={onPrepare}
+              />
+            </div>
+          ) : (
+            <Chip
+              selected={Boolean(prepared)}
+              disabled={Boolean(prepareFull && !prepared)}
+              onClick={onPrepare}
+            >
+              {prepared ? 'Preparada hoje' : 'Preparar hoje'}
+            </Chip>
+          )
+        ) : null}
+        {showPrimary && onPrimary ? (
+          <Chip selected={Boolean(primary)} onClick={onPrimary}>
+            {catalog.primaryPick?.label ?? 'Primária'}
+          </Chip>
+        ) : null}
+      </div>
+    ) : undefined
   return (
     <ExpandableCard
-      selected={selected}
+      selected={selected || preparedCount > 0}
       title={option.name}
       subtitle={[
         option.originalName,
@@ -206,7 +278,11 @@ function OptionCard({
             </Badge>
           ))}
           {primary && <Badge tone="accent">Primária</Badge>}
-          {prepared && !primary && <Badge tone="info">Preparada</Badge>}
+          {preparedCount > 0 && !primary && (
+            <Badge tone="info">
+              {preparedCount > 1 ? `Preparada ×${preparedCount}` : 'Preparada'}
+            </Badge>
+          )}
         </>
       }
       actions={
@@ -223,11 +299,12 @@ function OptionCard({
           {selected ? 'Selecionado' : 'Escolher'}
         </button>
       }
+      toolbar={prepareToolbar}
     >
       <RichText as="p" className="leading-relaxed">
         {polishRulesText(option.rulesSummary)}
       </RichText>
-      {selected && option.sections && option.sections.length > 0 && (
+      {option.sections && option.sections.length > 0 && (
         <ul className="space-y-1.5 border-t border-border/60 pt-2">
           {option.sections.map((s) => (
             <li key={s.label} className="leading-relaxed text-text-muted">
@@ -243,29 +320,13 @@ function OptionCard({
           ))}
         </ul>
       )}
-      {selected && (showPrepare || showPrimary) && (
-        <div className="flex flex-wrap gap-1.5">
-          {showPrepare && onPrepare && (
-            <Chip selected={Boolean(prepared)} onClick={onPrepare}>
-              {prepared ? 'Preparada hoje' : 'Preparar hoje'}
-              {catalog.allowPreparedDuplicates && preparedCount > 1
-                ? ` (${preparedCount})`
-                : ''}
-            </Chip>
-          )}
-          {showPrimary && onPrimary && (
-            <Chip selected={Boolean(primary)} onClick={onPrimary}>
-              {catalog.primaryPick?.label ?? 'Primária'}
-            </Chip>
-          )}
-        </div>
-      )}
     </ExpandableCard>
   )
 }
 
 interface ClassCatalogPickerProps {
   catalog: ClassCatalogDefinition
+  allCatalogs?: ClassCatalogDefinition[]
   choices: ClassChoices
   level: number
   intelligenceModifier?: number
@@ -274,6 +335,7 @@ interface ClassCatalogPickerProps {
 
 export function ClassCatalogPicker({
   catalog,
+  allCatalogs,
   choices,
   level,
   intelligenceModifier = 0,
@@ -293,12 +355,15 @@ export function ClassCatalogPicker({
     level,
     intelligenceModifier,
   )
+  const catalogs = allCatalogs?.length ? allCatalogs : [catalog]
   const visible = visibleCatalogOptions(catalog, choices, level)
   const picks =
     catalog.kind === 'daily'
       ? getCatalogPrepared(choices, catalog.id)
       : getCatalogPicks(choices, catalog.id)
   const prepared = getCatalogPrepared(choices, catalog.id)
+  const repertoire = catalogRepertoireIds(catalog, choices)
+  const preparedFull = prepared.length >= preparedNeeded
   const primary = choices.catalogPrimary?.[catalog.id]
 
   const categories = useMemo(() => {
@@ -358,30 +423,20 @@ export function ClassCatalogPicker({
   }
 
   function toggleMain(id: string) {
-    if (catalog.kind === 'daily') {
-      const next = toggleId(prepared, id, catalog.unique, needed)
-      let nextChoices = setList(choices, 'catalogPrepared', catalog.id, next)
-      if (primary && !next.includes(primary)) {
-        const { [catalog.id]: _, ...rest } = nextChoices.catalogPrimary ?? {}
-        nextChoices = { ...nextChoices, catalogPrimary: rest }
-      }
-      onChange(nextChoices)
-      return
-    }
-    const next = toggleId(picks, id, catalog.unique, needed)
-    let nextChoices = setList(choices, 'catalogPicks', catalog.id, next)
-    if (preparedNeeded > 0) {
-      nextChoices = setList(
-        nextChoices,
-        'catalogPrepared',
-        catalog.id,
-        prepared.filter((x) => next.includes(x)),
-      )
-    }
-    onChange(nextChoices)
+    onChange(
+      toggleCatalogPick(
+        catalog,
+        catalogs,
+        choices,
+        id,
+        level,
+        intelligenceModifier,
+      ),
+    )
   }
 
   function togglePrepared(id: string) {
+    if (catalog.preparedFromPicks && !repertoire.has(id)) return
     if (catalog.allowPreparedDuplicates) {
       if (prepared.length >= preparedNeeded) return
       onChange(setList(choices, 'catalogPrepared', catalog.id, [...prepared, id]))
@@ -512,8 +567,20 @@ export function ClassCatalogPicker({
           )}
 
           {catalog.kind !== 'daily' && preparedNeeded > 0 && (
-            <div className="mb-3">
-              <div className="mb-1 text-xs font-medium">
+            <div
+              className={`mb-3 rounded-lg border px-2.5 py-2 ${
+                prepared.length !== preparedNeeded
+                  ? 'border-danger/40 bg-danger/10'
+                  : 'border-border/70 bg-surface-2/40'
+              }`}
+            >
+              <div
+                className={`mb-1 text-xs font-medium ${
+                  prepared.length !== preparedNeeded
+                    ? 'text-danger'
+                    : 'text-text'
+                }`}
+              >
                 {catalog.preparedLabel ?? 'Preparadas hoje'} ({prepared.length}/
                 {preparedNeeded})
               </div>
@@ -545,9 +612,11 @@ export function ClassCatalogPicker({
                   })}
                 </div>
               )}
-              {prepared.length === 0 && (
-                <p className="text-[11px] text-text-dim">
-                  Marque “Preparar hoje” nos itens do repertório.
+              {prepared.length !== preparedNeeded && (
+                <p className="mt-1.5 text-[11px] text-text-muted">
+                  {catalog.allowPreparedDuplicates
+                    ? 'Escolher a fórmula já infunde uma dose. Use + / − no cartão para repetir a mesma até completar o dia.'
+                    : 'Escolher já marca como preparada (até o limite). Use “Preparar hoje” para trocar quais ficam ativas.'}
                 </p>
               )}
             </div>
@@ -593,6 +662,7 @@ export function ClassCatalogPicker({
           <div className="max-h-[28rem] space-y-2 overflow-y-auto pr-1">
             {filtered.map((opt) => {
               const isOn = picks.includes(opt.id)
+              const inRepertoire = isOn || repertoire.has(opt.id)
               const full = !isOn && picks.length >= needed
               return (
                 <OptionCard
@@ -606,10 +676,11 @@ export function ClassCatalogPicker({
                   }
                   primary={primary === opt.id}
                   disabled={full}
+                  prepareFull={preparedFull}
                   showPrepare={
                     catalog.kind !== 'daily' &&
                     preparedNeeded > 0 &&
-                    isOn
+                    inRepertoire
                   }
                   showPrimary={
                     Boolean(catalog.primaryPick) &&
@@ -618,6 +689,7 @@ export function ClassCatalogPicker({
                   }
                   onToggle={() => toggleMain(opt.id)}
                   onPrepare={() => togglePrepared(opt.id)}
+                  onRemovePrepared={() => removePreparedOne(opt.id)}
                   onPrimary={() => setPrimary(opt.id)}
                 />
               )
@@ -645,7 +717,30 @@ export function ClassCatalogsBlock({
   intelligenceModifier?: number
   onChange: (next: ClassChoices) => void
 }) {
-  const catalogs = getClassCatalogs(classDef)
+  const catalogs = useMemo(() => getClassCatalogs(classDef), [classDef])
+  const hydrated = useRef(false)
+
+  useEffect(() => {
+    if (hydrated.current || catalogs.length === 0) return
+    const next = hydrateCatalogPrepared(
+      catalogs,
+      choices,
+      level,
+      intelligenceModifier ?? 0,
+    )
+    const hasPool = catalogs.some(
+      (c) =>
+        catalogRepertoireIds(c, choices).size > 0 ||
+        getCatalogPrepared(choices, c.id).length > 0,
+    )
+    if (next) {
+      hydrated.current = true
+      onChange(next)
+      return
+    }
+    if (hasPool) hydrated.current = true
+  }, [catalogs, choices, level, intelligenceModifier, onChange])
+
   if (catalogs.length === 0) return null
   return (
     <>
@@ -653,6 +748,7 @@ export function ClassCatalogsBlock({
         <ClassCatalogPicker
           key={catalog.id}
           catalog={catalog}
+          allCatalogs={catalogs}
           choices={choices}
           level={level}
           intelligenceModifier={intelligenceModifier}

@@ -9,6 +9,7 @@ import {
   knownTraditionsFromAccess,
   learnableSpellRanks,
   learnSpell,
+  hydratePreparedSlotsFromKnown,
   spellRankIsLearnable,
   prepareIntoSlot,
   primarySpellSourceId,
@@ -400,7 +401,7 @@ export function SpellsPanel({
       const view = viewStateForSource(next, source.id, primaryId)
       const synced = syncPreparedSlots(view, slice)
       const prev = view.preparedSlots ?? []
-      if (
+      const structureChanged = !(
         synced.length === prev.length &&
         synced.every(
           (s, i) =>
@@ -409,16 +410,27 @@ export function SpellsPanel({
             s.spellId === prev[i]?.spellId &&
             s.expended === prev[i]?.expended,
         )
-      ) {
+      )
+      let nextView = { ...view, preparedSlots: synced }
+      const hydrated = hydratePreparedSlotsFromKnown(
+        nextView,
+        slice,
+        allSpells,
+      )
+      if (hydrated) {
+        nextView = hydrated
+        changed = true
+      } else if (structureChanged) {
+        changed = true
+      } else {
         continue
       }
       next = commitSourceSpellState(
         next,
         source.id,
-        { ...view, preparedSlots: synced },
+        nextView,
         primaryId,
       )
-      changed = true
     }
     if (changed && next) onChangeSpellState(next)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- só quando muda nível/classe/slots

@@ -42,6 +42,13 @@ export function navItemIsActive(
     return !inEditor
   }
 
+  if (targetPath === '/mundo') {
+    return currentPath.startsWith('/mundo/notas')
+  }
+  if (targetPath === '/mundo/mapas') {
+    return currentPath.startsWith('/mundo/mapas/')
+  }
+
   if (EXACT_PATHS.has(targetPath)) return false
   return currentPath.startsWith(`${targetPath}/`)
 }

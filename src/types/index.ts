@@ -333,6 +333,33 @@ export type {
   CreatureSpellcasting,
 } from './creature'
 export { isHomebrewCreature } from './creature'
+export type {
+  CountryLabelStyle,
+  MapCamera,
+  MapLegendEntry,
+  MapMarker,
+  MapVertex,
+  MarkerShape,
+  NoteAttachment,
+  NoteAttachmentKind,
+  WorldAssetKind,
+  WorldAssetRecord,
+  MapPath,
+  MapPathPoint,
+  MapPathStyle,
+  WorldCountry,
+  WorldFolder,
+  WorldMap,
+  WorldNote,
+} from './world'
+export {
+  MAP_PATH_STYLES,
+  MAP_PATH_STYLE_LABELS,
+  MARKER_SHAPES,
+  MARKER_SHAPE_LABELS,
+  NOTE_ATTACHMENT_KINDS,
+  NOTE_ATTACHMENT_KIND_LABELS,
+} from './world'
 
 export type ThemePreference = 'system' | 'dark' | 'light'
 

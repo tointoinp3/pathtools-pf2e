@@ -58,4 +58,14 @@ describe('navItemIsActive', () => {
       true,
     )
   })
+
+  test('notas do mundo não acendem mapas, e vice-versa', () => {
+    assert.equal(navItemIsActive('/mundo', loc('/mundo')), true)
+    assert.equal(navItemIsActive('/mundo', loc('/mundo/notas/abc')), true)
+    assert.equal(navItemIsActive('/mundo', loc('/mundo/mapas')), false)
+    assert.equal(navItemIsActive('/mundo/mapas', loc('/mundo/mapas')), true)
+    assert.equal(navItemIsActive('/mundo/mapas', loc('/mundo/mapas/xyz')), true)
+    assert.equal(navItemIsActive('/mundo/mapas', loc('/mundo')), false)
+    assert.equal(navItemIsActive('/mundo/mapas', loc('/mundo/notas/abc')), false)
+  })
 })

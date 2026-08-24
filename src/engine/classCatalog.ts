@@ -89,6 +89,191 @@ export function getCatalogPrepared(
   return choices.catalogPrepared?.[catalogId] ?? []
 }
 
+function patchCatalogList(
+  choices: ClassChoices,
+  key: 'catalogPicks' | 'catalogPrepared',
+  catalogId: string,
+  ids: string[],
+): ClassChoices {
+  return {
+    ...choices,
+    [key]: { ...(choices[key] ?? {}), [catalogId]: ids },
+  }
+}
+
+export function toggleCappedList(
+  list: string[],
+  id: string,
+  max: number,
+): string[] {
+  if (list.includes(id)) return list.filter((x) => x !== id)
+  if (list.length >= max) return list
+  return [...list, id]
+}
+
+/** Fórmulas/táticas do catálogo + as de `preparedFromCatalogIds` (ex.: campo do alquimista). */
+export function catalogRepertoireIds(
+  catalog: ClassCatalogDefinition,
+  choices: ClassChoices,
+  pickOverride?: string[],
+): Set<string> {
+  const ids = new Set(pickOverride ?? getCatalogPicks(choices, catalog.id))
+  for (const otherId of catalog.preparedFromCatalogIds ?? []) {
+    for (const id of getCatalogPicks(choices, otherId)) ids.add(id)
+  }
+  return ids
+}
+
+/**
+ * Liga/desliga uma opção do repertório e, se houver vaga, já marca como
+ * preparada/infundida no dia — inclusive quando a opção veio de outro
+ * catálogo (fórmulas do campo → itens infundidos).
+ */
+export function toggleCatalogPick(
+  catalog: ClassCatalogDefinition,
+  allCatalogs: ClassCatalogDefinition[],
+  choices: ClassChoices,
+  optionId: string,
+  level: number,
+  intelligenceModifier = 0,
+): ClassChoices {
+  if (catalog.kind === 'daily') {
+    const needed = effectiveCatalogSlotCount(
+      catalog,
+      choices,
+      level,
+      intelligenceModifier,
+    )
+    const attuned = getCatalogPrepared(choices, catalog.id)
+    const nextAttuned = toggleCappedList(attuned, optionId, needed)
+    if (nextAttuned === attuned) return choices
+    let next = patchCatalogList(
+      choices,
+      'catalogPrepared',
+      catalog.id,
+      nextAttuned,
+    )
+    if (catalog.primaryPick) {
+      const primary = next.catalogPrimary?.[catalog.id]
+      if (!primary || !nextAttuned.includes(primary)) {
+        const fallback = nextAttuned[0]
+        if (fallback) {
+          next = {
+            ...next,
+            catalogPrimary: {
+              ...(next.catalogPrimary ?? {}),
+              [catalog.id]: fallback,
+            },
+          }
+        } else {
+          const rest = { ...(next.catalogPrimary ?? {}) }
+          delete rest[catalog.id]
+          next = { ...next, catalogPrimary: rest }
+        }
+      }
+    }
+    return next
+  }
+
+  const needed = effectiveCatalogSlotCount(
+    catalog,
+    choices,
+    level,
+    intelligenceModifier,
+  )
+  const picks = getCatalogPicks(choices, catalog.id)
+  const nextPicks = toggleCappedList(picks, optionId, needed)
+  if (nextPicks === picks) return choices
+
+  const added = !picks.includes(optionId) && nextPicks.includes(optionId)
+  let next = patchCatalogList(choices, 'catalogPicks', catalog.id, nextPicks)
+
+  for (const target of allCatalogs) {
+    const preparedNeeded = catalogPreparedSlotCount(
+      target,
+      level,
+      intelligenceModifier,
+    )
+    if (preparedNeeded <= 0) continue
+    const feedsTarget =
+      target.id === catalog.id ||
+      (target.preparedFromCatalogIds ?? []).includes(catalog.id)
+    if (!feedsTarget) continue
+
+    let prepared = getCatalogPrepared(next, target.id)
+    const pool = catalogRepertoireIds(target, next)
+    if (target.preparedFromPicks) {
+      prepared = prepared.filter((id) => pool.has(id))
+    }
+    if (added && prepared.length < preparedNeeded) {
+      if (target.allowPreparedDuplicates || !prepared.includes(optionId)) {
+        prepared = [...prepared, optionId]
+      }
+    } else if (
+      !added &&
+      target.allowPreparedDuplicates &&
+      pool.has(optionId)
+    ) {
+      const idx = prepared.lastIndexOf(optionId)
+      if (idx >= 0) {
+        prepared = [...prepared.slice(0, idx), ...prepared.slice(idx + 1)]
+      }
+    }
+    next = patchCatalogList(next, 'catalogPrepared', target.id, prepared)
+  }
+
+  return next
+}
+
+/** Se o livro já tem fórmulas mas o dia está vazio, preenche com uma dose de cada.
+ *  Aparição sintonizada sem primária ganha a primeira como primária. */
+export function hydrateCatalogPrepared(
+  catalogs: ClassCatalogDefinition[],
+  choices: ClassChoices,
+  level: number,
+  intelligenceModifier = 0,
+): ClassChoices | null {
+  let next = choices
+  let changed = false
+  for (const catalog of catalogs) {
+    const preparedNeeded = catalogPreparedSlotCount(
+      catalog,
+      level,
+      intelligenceModifier,
+    )
+    if (preparedNeeded > 0) {
+      const prepared = getCatalogPrepared(next, catalog.id)
+      if (prepared.length === 0) {
+        const pool = [...catalogRepertoireIds(catalog, next)]
+        if (pool.length > 0) {
+          next = patchCatalogList(
+            next,
+            'catalogPrepared',
+            catalog.id,
+            pool.slice(0, preparedNeeded),
+          )
+          changed = true
+        }
+      }
+    }
+    if (catalog.primaryPick) {
+      const attuned = getCatalogPrepared(next, catalog.id)
+      const primary = next.catalogPrimary?.[catalog.id]
+      if (attuned.length > 0 && (!primary || !attuned.includes(primary))) {
+        next = {
+          ...next,
+          catalogPrimary: {
+            ...(next.catalogPrimary ?? {}),
+            [catalog.id]: attuned[0],
+          },
+        }
+        changed = true
+      }
+    }
+  }
+  return changed ? next : null
+}
+
 export function optionById(
   catalog: ClassCatalogDefinition,
   id: string,
@@ -297,12 +482,7 @@ export function validateClassCatalogs(
     )
     if (preparedNeeded > 0) {
       const prepared = getCatalogPrepared(choices, catalog.id)
-      const poolIds = new Set(picks)
-      if (catalog.preparedFromCatalogIds) {
-        for (const otherId of catalog.preparedFromCatalogIds) {
-          for (const id of getCatalogPicks(choices, otherId)) poolIds.add(id)
-        }
-      }
+      const poolIds = catalogRepertoireIds(catalog, choices)
       const uniquePrepared = catalog.allowPreparedDuplicates
         ? prepared
         : [...new Set(prepared)]

@@ -216,6 +216,80 @@ textarea {
   animation: shake-soft 0.35s ease-in-out;
 }
 
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-pop-in {
+  animation: pop-in 0.28s var(--ease-out-soft) both;
+}
+
+@keyframes world-fill-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.world-country-fill {
+  animation: world-fill-in 0.45s var(--ease-out-soft) both;
+}
+
+@keyframes world-draft-breathe {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.world-draft-fill {
+  animation: world-draft-breathe 2.2s ease-in-out infinite;
+}
+
+@keyframes world-snap-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.world-snap-ring {
+  animation: world-snap-pulse 1.15s ease-in-out infinite;
+}
+
+@keyframes world-halo {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+.world-close-halo {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: world-halo 1.4s ease-in-out infinite;
+}
+
 .font-display {
   font-family: var(--font-display);
 }
@@ -288,6 +362,41 @@ textarea {
 .field-control:focus {
   border-color: color-mix(in srgb, var(--color-accent) 60%, var(--color-border));
   box-shadow: 0 0 0 3px rgb(var(--color-accent-rgb) / 0.14);
+}
+
+.live-tool {
+  border-radius: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  color: var(--color-text-muted);
+}
+.live-tool:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+.live-line:empty:before {
+  content: attr(data-placeholder);
+  color: var(--color-text-dim);
+  pointer-events: none;
+}
+
+.wiki-chip {
+  color: var(--color-info);
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: text;
+}
+.wiki-chip-missing {
+  color: var(--color-danger);
+}
+
+.live-table-plus {
+  opacity: 0.45;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+.group\/livetable:hover .live-table-plus,
+.group\/livetable:focus-within .live-table-plus {
+  opacity: 1;
 }
 
 /*

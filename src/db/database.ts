@@ -23,6 +23,10 @@ import {
   type CharacterGroup,
   type SharedStash,
   type SeededTable,
+  type WorldNote,
+  type WorldFolder,
+  type WorldMap,
+  type WorldAssetRecord,
 } from '@/types'
 import Dexie, { type EntityTable } from 'dexie'
 import { nowIso } from '@/utils/id'
@@ -53,6 +57,10 @@ export class PathfinderDB extends Dexie {
   tokenImages!: EntityTable<TokenImageRecord, 'id'>
   characterGroups!: EntityTable<CharacterGroup, 'id'>
   sharedStashes!: EntityTable<SharedStash, 'id'>
+  worldNotes!: EntityTable<WorldNote, 'id'>
+  worldFolders!: EntityTable<WorldFolder, 'id'>
+  worldMaps!: EntityTable<WorldMap, 'id'>
+  worldAssets!: EntityTable<WorldAssetRecord, 'id'>
 
   constructor() {
     super('pf2e-super-app')
@@ -336,6 +344,13 @@ export class PathfinderDB extends Dexie {
       tokenImages: 'id, scope, ownerId',
       characterGroups: 'id, name, updatedAt',
       sharedStashes: 'id, name, groupId, updatedAt',
+    })
+
+    this.version(15).stores({
+      worldNotes: 'id, title, folderId, pinned, updatedAt',
+      worldFolders: 'id, name, parentId, updatedAt',
+      worldMaps: 'id, name, updatedAt',
+      worldAssets: 'id, kind, name, updatedAt',
     })
   }
 }

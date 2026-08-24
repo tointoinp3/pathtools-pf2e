@@ -67,6 +67,9 @@ export type { ClassValidationIssue, ResolvedClassBenefits, ClassFeaturePickView 
 export {
   catalogSlotCount,
   catalogPreparedSlotCount,
+  catalogRepertoireIds,
+  toggleCatalogPick,
+  hydrateCatalogPrepared,
   visibleCatalogOptions,
   validateClassCatalogs,
   pruneCatalogChoices,
@@ -313,6 +316,8 @@ export {
   applyDailyPreparations,
   resolveFocusMax,
   learnSpell,
+  fillEmptyPreparedSlot,
+  hydratePreparedSlotsFromKnown,
   unlearnSpell,
   learnRitual,
   unlearnRitual,

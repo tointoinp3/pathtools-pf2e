@@ -1140,7 +1140,78 @@ export function learnSpell(
   }
   const ids = new Set(base.collectionSpellIds ?? [])
   ids.add(spell.id)
-  return { ...base, collectionSpellIds: [...ids] }
+  let next: CharacterSpellState = { ...base, collectionSpellIds: [...ids] }
+  if (access) {
+    next = fillEmptyPreparedSlot(next, access, spell.id, spell.rank)
+    if (
+      access.hasSignatureSpells &&
+      spell.rank > 0 &&
+      (next.signatureSpellIds ?? []).length === 0
+    ) {
+      next = { ...next, signatureSpellIds: [spell.id] }
+    }
+  }
+  return next
+}
+
+/** Preenche um espaço vazio do mesmo posto (ou maior) ao aprender a magia. */
+export function fillEmptyPreparedSlot(
+  state: CharacterSpellState,
+  access: ResolvedSpellcastingAccess,
+  spellId: string,
+  rank: number,
+): CharacterSpellState {
+  if (!usesPreparedSlots(access) || rank <= 0) return state
+  const slots = syncPreparedSlots(state, access)
+  if (slots.some((s) => s.spellId === spellId)) {
+    return { ...state, preparedSlots: slots }
+  }
+  const emptySame = slots.find((s) => !s.font && s.rank === rank && !s.spellId)
+  const emptyHigher = slots.find((s) => !s.font && s.rank > rank && !s.spellId)
+  const target = emptySame ?? emptyHigher
+  if (!target) return { ...state, preparedSlots: slots }
+  return {
+    ...state,
+    preparedSlots: slots.map((s) =>
+      s.id === target.id ? { ...s, spellId, expended: false } : s,
+    ),
+  }
+}
+
+/**
+ * Se o grimório tem magias e todos os espaços do dia estão vazios, preenche
+ * com as magias já aprendidas (não mexe se o jogador já preparou alguma).
+ */
+export function hydratePreparedSlotsFromKnown(
+  state: CharacterSpellState | undefined,
+  access: ResolvedSpellcastingAccess,
+  spells: Array<{ id: string; rank: number }>,
+): CharacterSpellState | null {
+  if (!usesPreparedSlots(access)) return null
+  const base = { ...emptySpellState(), ...state }
+  const slots = syncPreparedSlots(base, access)
+  const fillable = slots.filter((s) => !s.font && s.rank > 0)
+  if (fillable.length === 0) return null
+  if (fillable.some((s) => s.spellId)) return null
+  const byId = new Map(spells.map((s) => [s.id, s]))
+  const known = (base.collectionSpellIds ?? []).filter((id) => byId.has(id))
+  if (known.length === 0) return null
+  let nextSlots = slots
+  let changed = false
+  for (const spellId of known) {
+    const rank = byId.get(spellId)?.rank ?? 0
+    if (rank <= 0) continue
+    const empty =
+      nextSlots.find((s) => !s.font && s.rank === rank && !s.spellId) ??
+      nextSlots.find((s) => !s.font && s.rank >= rank && !s.spellId)
+    if (!empty) continue
+    nextSlots = nextSlots.map((s) =>
+      s.id === empty.id ? { ...s, spellId, expended: false } : s,
+    )
+    changed = true
+  }
+  if (!changed) return null
+  return { ...base, preparedSlots: nextSlots }
 }
 
 export function unlearnSpell(

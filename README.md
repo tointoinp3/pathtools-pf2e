@@ -26,9 +26,8 @@ assim**. Fichas do site e do programa não se misturam.
 
 ## Estado atual
 
-Ficha, compêndio, bestiário, encontros, saque e combate em grid já funcionam.
-O módulo de **Mundo** (lore, NPCs, campanhas) ainda não existe — a rota mostra
-"em breve".
+Ficha, compêndio, bestiário, encontros, saque, combate em grid e **mundo**
+(notas tipo wiki + mapa de campanha) já funcionam.
 
 ### Para o jogador
 
@@ -60,6 +59,10 @@ O módulo de **Mundo** (lore, NPCs, campanhas) ainda não existe — a rota most
   conta-gotas, zoom, iniciativa com rodada e turno, PV e condições por ficha
   (a iniciativa já desconta penalidade de condição) e importação de um
   encontro salvo inteiro
+- **mundo**: notas em markdown com pastas aninháveis, menu ⋯ (duplicar/apagar)
+  e `[[links]]` estilo Obsidian; tabelas na prévia crescem com linha/coluna;
+  mapa da campanha com ícones, fronteiras e caminhos (tracejado, pontilhado,
+  estrada)
 
 ### Para o grupo
 

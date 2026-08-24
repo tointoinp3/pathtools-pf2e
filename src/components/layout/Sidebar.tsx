@@ -39,15 +39,24 @@ const COMBAT_COMPENDIUM_PATHS = new Set([
   '/compendio/homebrew',
 ])
 
+const WORLD_COMPENDIUM_PATHS = new Set([
+  '/compendio/equipamento',
+  '/compendio/divindades',
+  '/compendio/guias',
+  '/compendio/homebrew',
+])
+
 const COMBAT_TOOL: NavItem = {
   to: '/combate',
   label: 'Combate',
   hint: 'Grid com fichas, PV e iniciativa',
 }
 
-const SOON_TOOLS: NavItem[] = [
-  { to: '/em-breve/mundo', label: 'Mundo', soon: true },
-]
+const MUNDO_TOOL: NavItem = {
+  to: '/mundo',
+  label: 'Mundo',
+  hint: 'Notas, wiki e mapa da campanha',
+}
 
 const PERSONAGEM_TOOL: NavItem = {
   to: '/personagens',
@@ -69,12 +78,14 @@ const BESTIARY_TOOL: NavItem = {
 
 function toolsFor(mode: WorkspaceMode): NavItem[] {
   if (mode === 'character')
-    return [SAQUE_TOOL, BESTIARY_TOOL, COMBAT_TOOL, ...SOON_TOOLS]
+    return [SAQUE_TOOL, BESTIARY_TOOL, COMBAT_TOOL, MUNDO_TOOL]
   if (mode === 'loot')
-    return [PERSONAGEM_TOOL, BESTIARY_TOOL, COMBAT_TOOL, ...SOON_TOOLS]
+    return [PERSONAGEM_TOOL, BESTIARY_TOOL, COMBAT_TOOL, MUNDO_TOOL]
   if (mode === 'combat')
-    return [PERSONAGEM_TOOL, SAQUE_TOOL, BESTIARY_TOOL, ...SOON_TOOLS]
-  return [PERSONAGEM_TOOL, SAQUE_TOOL, COMBAT_TOOL, ...SOON_TOOLS]
+    return [PERSONAGEM_TOOL, SAQUE_TOOL, BESTIARY_TOOL, MUNDO_TOOL]
+  if (mode === 'world')
+    return [PERSONAGEM_TOOL, SAQUE_TOOL, BESTIARY_TOOL, COMBAT_TOOL]
+  return [PERSONAGEM_TOOL, SAQUE_TOOL, COMBAT_TOOL, MUNDO_TOOL]
 }
 
 function primarySection(mode: WorkspaceMode): NavSection {
@@ -145,6 +156,23 @@ function primarySection(mode: WorkspaceMode): NavSection {
           to: '/bestiario/encontros/novo',
           label: 'Criar Encontro',
           hint: 'Sortear pelo orçamento de XP',
+        },
+      ],
+    }
+  }
+  if (mode === 'world') {
+    return {
+      title: 'Mundo',
+      items: [
+        {
+          to: '/mundo',
+          label: 'Notas',
+          hint: 'Wiki com pastas e [[links]]',
+        },
+        {
+          to: '/mundo/mapas',
+          label: 'Mapas',
+          hint: 'Fundo, ícones e fronteiras',
         },
       ],
     }
@@ -251,6 +279,10 @@ function buildSections(mode: WorkspaceMode): NavSection[] {
           ? compendiumItems.filter((item) =>
               COMBAT_COMPENDIUM_PATHS.has(item.to),
             )
+          : mode === 'world'
+            ? compendiumItems.filter((item) =>
+                WORLD_COMPENDIUM_PATHS.has(item.to),
+              )
           : compendiumItems
 
   return [
@@ -268,6 +300,7 @@ function modeTagline(mode: WorkspaceMode): string {
   if (mode === 'loot') return 'Pathfinder 2e Remaster · gerador de saque'
   if (mode === 'bestiary') return 'Pathfinder 2e Remaster · bestiário'
   if (mode === 'combat') return 'Pathfinder 2e Remaster · combate'
+  if (mode === 'world') return 'Pathfinder 2e Remaster · worldbuilding'
   return 'Pathfinder 2e Remaster · ficha local'
 }
 
@@ -275,6 +308,7 @@ function modeFooter(mode: WorkspaceMode): string {
   if (mode === 'loot') return 'Equipamento · Kits · Saque'
   if (mode === 'bestiary') return 'Criaturas · Encontros · Equipamento'
   if (mode === 'combat') return 'Grid · Iniciativa · Baús'
+  if (mode === 'world') return 'Notas · Mapas · Fronteiras'
   return 'Ancestralidades · Classes · Origens · Homebrew'
 }
 
@@ -359,7 +393,7 @@ export function Sidebar() {
           </div>
           <ThemePicker compact />
         </div>
-        Fundação v0.2.1
+        Fundação v0.3.0
         <br />
         {modeFooter(mode)}
       </div>

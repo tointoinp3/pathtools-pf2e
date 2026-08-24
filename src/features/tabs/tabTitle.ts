@@ -33,6 +33,8 @@ const EXACT_TITLES: Record<string, string> = {
   '/combate': 'Combate',
   '/combate/grid': 'Grid',
   '/combate/token': 'Criar token',
+  '/mundo': 'Mundo',
+  '/mundo/mapas': 'Mapas',
   '/em-breve/combate': 'Combate',
   '/em-breve/mundo': 'Mundo',
 }
@@ -49,6 +51,7 @@ export function homeHrefForMode(mode: WorkspaceMode): string {
   if (mode === 'loot') return '/saques'
   if (mode === 'bestiary') return '/bestiario'
   if (mode === 'combat') return '/combate'
+  if (mode === 'world') return '/mundo'
   return DEFAULT_HOME_HREF
 }
 
@@ -56,6 +59,7 @@ export function homeTitleForMode(mode: WorkspaceMode): string {
   if (mode === 'loot') return 'Saques'
   if (mode === 'bestiary') return 'Bestiário'
   if (mode === 'combat') return 'Combate'
+  if (mode === 'world') return 'Mundo'
   return 'Personagens'
 }
 
@@ -112,6 +116,9 @@ export function titleFromHref(href: string): string {
 
   const combatId = pathMatch(pathname, /^\/combate\/([^/]+)$/)
   if (combatId && combatId !== 'grid' && combatId !== 'token') return 'Combate'
+
+  if (pathMatch(pathname, /^\/mundo\/notas\/([^/]+)$/)) return 'Nota'
+  if (pathMatch(pathname, /^\/mundo\/mapas\/([^/]+)$/)) return 'Mapa'
 
   const creatureSession = pathMatch(pathname, /^\/bestiario\/([^/]+)\/sessao$/)
   if (creatureSession) return 'Ficha de sessão'

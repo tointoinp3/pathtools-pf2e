@@ -99,9 +99,6 @@ const HomebrewCompendiumPage = lazy(() =>
 const SettingsPage = lazy(() =>
   import('@/pages/SettingsPage').then((m) => ({ default: m.SettingsPage })),
 )
-const ComingSoonPage = lazy(() =>
-  import('@/pages/ComingSoonPage').then((m) => ({ default: m.ComingSoonPage })),
-)
 const LootListPage = lazy(() =>
   import('@/pages/LootListPage').then((m) => ({ default: m.LootListPage })),
 )
@@ -152,6 +149,21 @@ const TokenStudioPage = lazy(() =>
 const CombatTrackerPage = lazy(() =>
   import('@/pages/CombatTrackerPage').then((m) => ({
     default: m.CombatTrackerPage,
+  })),
+)
+const WorldNotesPage = lazy(() =>
+  import('@/pages/WorldNotesPage').then((m) => ({
+    default: m.WorldNotesPage,
+  })),
+)
+const WorldMapListPage = lazy(() =>
+  import('@/pages/WorldMapListPage').then((m) => ({
+    default: m.WorldMapListPage,
+  })),
+)
+const WorldMapPage = lazy(() =>
+  import('@/pages/WorldMapPage').then((m) => ({
+    default: m.WorldMapPage,
   })),
 )
 
@@ -419,12 +431,40 @@ export function AppRouter() {
           element={<Navigate to="/combate" replace />}
         />
         <Route
-          path="em-breve/mundo"
+          path="mundo"
           element={
             <Suspense fallback={<RouteFallback />}>
-              <ComingSoonPage title="Mundo" />
+              <WorldNotesPage />
             </Suspense>
           }
+        />
+        <Route
+          path="mundo/notas/:id"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <WorldNotesPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="mundo/mapas"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <WorldMapListPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="mundo/mapas/:id"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <WorldMapPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="em-breve/mundo"
+          element={<Navigate to="/mundo" replace />}
         />
         <Route path="*" element={<Navigate to="/personagens" replace />} />
       </Route>

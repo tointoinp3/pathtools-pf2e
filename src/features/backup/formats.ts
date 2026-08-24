@@ -31,8 +31,14 @@ export function isCombatsFileFormat(format: unknown): boolean {
   return format === COMBATS_FORMAT
 }
 
+export const WORLD_FORMAT = `${APP_SLUG}.world` as const
+
+export function isWorldFileFormat(format: unknown): boolean {
+  return format === WORLD_FORMAT
+}
+
 export function invalidBackupJsonMessage(
-  kind?: 'character' | 'homebrew' | 'combat',
+  kind?: 'character' | 'homebrew' | 'combat' | 'world',
 ): string {
   if (kind === 'character') {
     return `Arquivo inválido. Use um JSON de personagem exportado pelo ${APP_NAME}.`
@@ -42,6 +48,9 @@ export function invalidBackupJsonMessage(
   }
   if (kind === 'combat') {
     return `Arquivo inválido. Use um JSON de combate exportado pelo ${APP_NAME}.`
+  }
+  if (kind === 'world') {
+    return `Arquivo inválido. Use um JSON de mundo exportado pelo ${APP_NAME}.`
   }
   return `Arquivo inválido. Use um JSON exportado pelo ${APP_NAME}.`
 }
